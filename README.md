@@ -9,8 +9,8 @@ Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed !
 
 
 **Usage :**
-
-  - Put django_extjs/static static dir somewhere on your statics
+  - Clone the Git repo and create a django_extjs app in your django project
+  - Put static folder somewhere on your statics
   - Create an example view from views.py
   - Edit static/example.html to match your view and static paths
   - Open your form from ExtJs:
