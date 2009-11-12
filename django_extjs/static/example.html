@@ -6,9 +6,9 @@
         <script type="text/javascript" src="/core/static/js/ext-2.2/ext-all-debug.js"></script>
         
         
-        <script type="text/javascript" src="/apps/genericforms/static/js/Ext.ux.DateTime.js"></script> 
-        <script type="text/javascript" src="/apps/genericforms/static/js/Ext.ux.DjangoForms.js"></script> 
-        <link rel="stylesheet" type="text/css" href="/apps/genericforms/static/css/genericforms.css" /> 
+        <script type="text/javascript" src="/apps/django_extjs/static/js/Ext.ux.DateTime.js"></script> 
+        <script type="text/javascript" src="/apps/django_extjs/static/js/Ext.ux.DjangoForms.js"></script> 
+        <link rel="stylesheet" type="text/css" href="/apps/django_extjs/static/css/genericforms.css" /> 
         
         <script language="javascript">
 
@@ -17,8 +17,7 @@
 
              });
              
-             
-             
+
              
              // simplest example of a django generated Form (EmailFormExample)
              // its loaded then displayed in a new window
@@ -31,7 +30,7 @@
                         ,autoHeight:true
                       
                     });
-                 var a = new Ext.ux.DjangoForm({url:'/apps/genericforms/example_email', callback:function(form) {w.add(form);w.show();}});
+                 var a = new Ext.ux.DjangoForm({url:'/apps/django_extjs/example_email', callback:function(form) {w.add(form);w.show();}});
              }
              
              
@@ -48,7 +47,7 @@
                         ,autoHeight:true
                       
                     });
-                 var a = new Ext.ux.DjangoForm({url:'/apps/genericforms/example_model', callback:function(form) {w.add(form);w.show();}});
+                 var a = new Ext.ux.DjangoForm({url:'/apps/django_extjs/example_model', callback:function(form) {w.add(form);w.show();}});
              }
              
              
@@ -57,7 +56,7 @@
             // this is a little more complex as you receive the form config then use it in a custom extjs formpanel
             function openForm3() {
                 // as loading is asynchronous you need to declare a callback
-                 var a = new Ext.ux.DjangoForm({url:'/apps/genericforms/contrat', baseParamsLoad:{pk:1}, callback:customFormReady});
+                 var a = new Ext.ux.DjangoForm({url:'/apps/django_extjs/contrat', baseParamsLoad:{pk:1}, callback:customFormReady});
              }
            
              // simplest example of a django generated ModelForm (AbstractModelExampleForm)

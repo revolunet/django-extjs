@@ -9,11 +9,26 @@ Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed !
 
 
 **Usage :**
-  - Put django_extjs on your python path
-  - Put static dir somewhere on your statics
-  - Create an example views.py
-  - Edit example.html to match your view and static paths
+
+  - Put django_extjs/static static dir somewhere on your statics
+  - Create an example view from views.py
+  - Edit static/example.html to match your view and static paths
+  - Open your form :
   
+        // simplest example of a django generated Form (EmailFormExample)
+        // its loaded then displayed in a new window
+        function openForm() {
+        // as loading is asynchronous you need to declare a callback
+          var w = new Ext.Window({
+                title:'simple django Form'
+                ,autoWidth:true
+                ,autoScroll:true
+                ,autoHeight:true
+              
+            });
+         var a = new Ext.ux.DjangoForm({url:'/apps/django_extjs/example_email', callback:function(form) {w.add(form);w.show();}});
+        }
+             
   
 **The lib provides :**
 
