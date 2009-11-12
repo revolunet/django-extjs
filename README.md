@@ -11,6 +11,8 @@ Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed !
 **Usage :**
   - Put django_extjs on your python path
   - Put static dir somewhere on your statics
+  - Create an example views.py
+  - Edit example.html to match your view and static paths
   
   
 **The lib provides :**

@@ -1,0 +1,178 @@
+
+
+<html>
+        <link rel="stylesheet" type="text/css" href="/core/static/js/ext-2.2/resources/css/ext-all.css" /> 
+        <script type="text/javascript" src="/core/static/js/ext-2.2/adapter/ext/ext-base.js"></script>
+        <script type="text/javascript" src="/core/static/js/ext-2.2/ext-all-debug.js"></script>
+        
+        
+        <script type="text/javascript" src="/apps/genericforms/static/js/Ext.ux.DateTime.js"></script> 
+        <script type="text/javascript" src="/apps/genericforms/static/js/Ext.ux.DjangoForms.js"></script> 
+        <link rel="stylesheet" type="text/css" href="/apps/genericforms/static/css/genericforms.css" /> 
+        
+        <script language="javascript">
+
+           Ext.onReady(function() {       
+   
+
+             });
+             
+             
+             
+             
+             // simplest example of a django generated Form (EmailFormExample)
+             // its loaded then displayed in a new window
+             function openForm() {
+                // as loading is asynchronous you need to declare a callback
+                  var w = new Ext.Window({
+                        title:'simple django Form'
+                        ,autoWidth:true
+                        ,autoScroll:true
+                        ,autoHeight:true
+                      
+                    });
+                 var a = new Ext.ux.DjangoForm({url:'/apps/genericforms/example_email', callback:function(form) {w.add(form);w.show();}});
+             }
+             
+             
+             
+             
+             // simplest example of a django generated ModelForm (AbstractModelExampleForm)
+             // its loaded then displayed in a new window
+             function openForm2() {
+                // as loading is asynchronous you need to declare a callback
+                  var w = new Ext.Window({
+                        title:'simple django ModelForm'
+                        ,autoWidth:true
+                        ,autoScroll:true
+                        ,autoHeight:true
+                      
+                    });
+                 var a = new Ext.ux.DjangoForm({url:'/apps/genericforms/example_model', callback:function(form) {w.add(form);w.show();}});
+             }
+             
+             
+             
+             
+            // this is a little more complex as you receive the form config then use it in a custom extjs formpanel
+            function openForm3() {
+                // as loading is asynchronous you need to declare a callback
+                 var a = new Ext.ux.DjangoForm({url:'/apps/genericforms/contrat', baseParamsLoad:{pk:1}, callback:customFormReady});
+             }
+           
+             // simplest example of a django generated ModelForm (AbstractModelExampleForm)
+               function customFormReady(django_form) {
+                // 2nd form is ready :)
+                    
+                // custom form, it pick some fields from the provided config with a 'DjangoField' ext component that you can override
+                
+                // you can duplicate defaults buttons if you like
+                  var btns = [];
+                  Ext.each(django_form.buttons, function(item, index, items) {
+                            btns.push(item.cloneConfig());
+                    }, this);
+                        
+
+                //your custom form, based on default django_form formpanel config
+                var CustomForm = new Ext.FormPanel({
+                    width:600
+                    ,autoHeight:true
+                    ,border:false
+                    ,bodyStyle:'padding:5px'
+                    ,url:django_form.url
+                    ,buttons:btns
+                    ,items:[
+                       {
+                        layout:'column'
+                        ,border:false
+                        ,items:[{
+                                xtype:'fieldset'
+                                ,columnWidth:.5
+                                ,bodyStyle:'padding:5px'
+                                ,style:'margin-right:10px'
+                                ,title: 'Contrat'
+                                ,collapsible: false
+                                ,autoHeight:true
+                                //,height:'100%%'
+                                ,defaults: {django_form:django_form }
+                                ,items:[
+                                     {xtype:'DjangoField', name:'compagnie', emptyText:'compagnie',width:150} 
+                                    ,{xtype:'DjangoField', name:'option' , emptyText:'options', width:150} 
+                                    ,{xtype:'DjangoField', name:'police', width:150, style:'text-align:center;font-size:14px;font-weight:bold;color:red' , emptyText:'numéro contrat'} 
+                                    ,{xtype:'DjangoField', name:'agent', fieldLabel:'Signé par', width:150 , emptyText:'agent'} 
+                                    ,{xtype:'DjangoField', name:'cotisation', fieldLabel:'Cotisation (en €)', width:60 , emptyText:'0', style:'text-align:right'}
+                                    ,{xtype:'DjangoField', fieldLabel:'Durée cotisation', name:'cotisation_mois', width:150, editable:false, forceSelection:true}
+                                  ]
+                            },
+                            {
+                            xtype:'fieldset'
+                            ,columnWidth:.5
+                            ,bodyStyle:'padding:5px'
+                            ,title: 'Dates'
+                            ,collapsible: false
+                            ,autoHeight:true
+                            ,defaults: {django_form:django_form,width:95}
+                            ,items:[
+                                 {xtype:'DjangoField', name:'date', disabled:true, fieldLabel:'Date création', width:200} 
+                                ,{xtype:'DjangoField', name:'date_modif', disabled:true, fieldLabel:'Date modif', width:200} 
+                                ,{xtype:'DjangoField', name:'date_signature'} 
+                                ,{xtype:'DjangoField', name:'date_effet'} 
+                                ,{xtype:'DjangoField', name:'date_production'} 
+                                ,{xtype:'DjangoField', name:'date_resil'} 
+                              ]
+                           }
+
+                            ]
+                        },
+                        {
+                            xtype:'DjangoField'
+                            ,hideLabel:true
+                            ,style:'margin-top:10px'
+                            ,width:'100%%'
+                            ,height:100
+                            ,name:'obs'
+                            ,django_form:django_form
+                            ,emptyText:'observations'
+                        }
+                        ,
+                        {
+                            // we auto add any hidden field in the django config
+                            xtype:'DjangoHiddenFields'
+                            ,name:'obs'
+                            ,value:'blabl'
+                            ,django_form:django_form
+                        }
+                        
+                           
+                       ]
+                    
+                    });
+                  
+                  
+                    var w = new Ext.Window({
+                        title:'test'
+                        ,autoWidth:true
+                        ,autoScroll:true
+                        ,autoHeight:true
+                        ,items:CustomForm
+                    });
+                
+                     w.show();
+             
+                }
+             
+ 
+        </script>
+    <body>
+  
+    <div id="form2"></div>
+    <div id="form3"></div>
+    <button onclick="openForm()">load EmailFormExample</button>
+    <button onclick="openForm2()">load AbstractModelExampleForm</button>
+    <button onclick="openForm3()">open Custom example Form</button>
+    <button onclick="openForm4()">open Model example Form</button>
+ 
+   
+    </body>
+    </html>
+    
