@@ -83,9 +83,9 @@ class ExtJsForm(object):
                 
                 defaultConfig['value'] = ''
                 if self.initial.get(field, '') not in ['', None]:
-                    defaultConfig['value'] = u'%s' % self.initial[field]
+                    defaultConfig['value'] = self.initial[field]
                 elif ofield.initial:
-                    defaultConfig['value'] = u'%s' % ofield.initial
+                    defaultConfig['value'] = ofield.initial
         
                 s = ofield.widget.attrs.get('style', None)
                 if s:
@@ -215,6 +215,7 @@ class ExtJsForm(object):
                 elif ofield.__class__.__name__ == 'DateTimeField':
                     extfield = defaultConfig.copy()
                     extfield['xtype'] = 'xdatetime'
+                  #  print 'xdatetime', ofield.initial, extfield['value'] 
                     # todo : ugly !!
                     date_format = ofield.input_formats[0]
                     (datef, timef) = date_format.split(' ')
@@ -234,9 +235,14 @@ class ExtJsForm(object):
                             extfield['dateConfig'] = {'value':0}
                             extfield['timeConfig'] = {'value':0}
                     else:
-                        extfield['value'] = ''
-                        extfield['dateConfig'] = {'value':''}
-                        extfield['timeConfig'] = {'value':''}
+                        if extfield['value'].__class__.__name__ == 'datetime':
+                            extfield['dateConfig'] = {'value':extfield['value'].strftime(datef)}
+                            extfield['timeConfig'] = {'value':extfield['value'].strftime(timef)}
+                            extfield['value'] = extfield['value'].strftime(date_format)
+                        else:
+                            extfield['value'] = ''
+                            extfield['dateConfig'] = {'value':''}
+                            extfield['timeConfig'] = {'value':''}
                     ext_fields.append(extfield)                
                 # email
                 elif ofield.__class__.__name__ == 'EmailField':

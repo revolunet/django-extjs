@@ -34,6 +34,23 @@
              }
              
              
+             // simplest example of a django generated Form (EmailFormExample)
+             // its loaded then displayed in a new window
+             function openRappel() {
+                // as loading is asynchronous you need to declare a callback
+                  var w = new Ext.Window({
+                        title:'Envoyer un rappel'
+                        ,iconCls:'icon-rappel'
+                        ,autoWidth:true
+                        ,autoScroll:true
+                        ,autoHeight:true
+                      
+                    });
+                 var a = new Ext.ux.DjangoForm({url:'/apps/rappels/form_rappel', callback:function(form) {w.add(form);w.show();}});
+             }
+             
+             
+             
              
              
              // simplest example of a django generated ModelForm (AbstractModelExampleForm)
@@ -166,11 +183,16 @@
   
     <div id="form2"></div>
     <div id="form3"></div>
-    <button onclick="openForm()">load EmailFormExample</button>
-    <button onclick="openForm2()">load AbstractModelExampleForm</button>
-    <button onclick="openForm3()">open Custom example Form</button>
-    <button onclick="openForm4()">open Model example Form</button>
- 
+    <p>&nbsp;</p>
+        <p>&nbsp;</p>
+    <button onclick="openForm()">load EmailFormExample</button><br><br>
+    <button onclick="openForm2()">load AbstractModelExampleForm</button><br><br>
+    
+    <button onclick="openRappel()">load Rappel View</button><br><br>
+    <!--
+    <button onclick="openForm3()">open Custom example Form</button><br><br>
+    <button onclick="openForm4()">open Model example Form</button><br><br>
+    -->
    
     </body>
     </html>
