@@ -13,7 +13,7 @@ Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed !
   - Put django_extjs/static static dir somewhere on your statics
   - Create an example view from views.py
   - Edit static/example.html to match your view and static paths
-  - Open your form :
+  - Open your form from ExtJs:
   
         // simplest example of a django generated Form (EmailFormExample)
         // its loaded then displayed in a new window
