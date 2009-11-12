@@ -9,6 +9,7 @@ Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed !
 
 
 **Usage :**
+
   - Clone the Git repo and create a django_extjs app in your django project
   - Put static folder somewhere on your statics
   - Create an example view from views.py
