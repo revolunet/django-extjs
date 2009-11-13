@@ -46,16 +46,18 @@
                       
                     });
                  var a = new Ext.ux.DjangoForm({
-                     url:'/apps/rappels/form_rappel'
+                     url:'/apps/rappels/form_sendrappel'
                     ,callback:function(form) {w.add(form);w.show();}
                     ,baseParams:{
                             'content_type':'form.Famille'
                             ,'object_id':709
                         }
+                        // full override of submitsucces function to skip the confirmation dialog
+                    ,submitSuccess:function() {
+                        w.close();
+                    }
                     });
-                 a.on('submitSuccess', function() {
-                    w.close();
-                });
+             
              }
              
              

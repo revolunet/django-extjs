@@ -16,7 +16,7 @@
                          Ext.ux.DjangoForm.superclass.initComponent.apply(this, arguments);
 
                          this.callback(this);
-                         this.addEvents('submitSuccess');
+                         this.addEvents('submitSuccess', 'submitError');
                      }
                      var o = {output:'json'}
                      if (this.baseParamsLoad) Ext.apply(o, this.baseParamsLoad);
@@ -30,24 +30,33 @@
                     });
                    
                 }
-                ,validResponse:function(form, action) {
-                       if (action.result.success) {
-                            Ext.Msg.show({
-                               title:'Succes',
-                               msg: 'Formulaire bien enregistre',
-                               buttons: Ext.Msg.OK,               
-                               icon: Ext.MessageBox.INFO 
-                            });
-                            this.fireEvent('submitSuccess');
-                       
-                       }
-                       else {
-                            Ext.Msg.show({
+              ,submitSuccess:function() {
+                     this.fireEvent('submitSuccess');
+                     Ext.Msg.show({
+                       title:'Succes',
+                       msg: 'Formulaire bien enregistre',
+                       buttons: Ext.Msg.OK,               
+                       icon: Ext.MessageBox.INFO 
+                    });
+                }
+                ,submitError:function(msg) {
+                
+                        this.fireEvent('submitError', msg);
+                        Ext.Msg.show({
                                title:'Erreur',
-                               msg: 'Impossible de valider : <br>' + action.result.msg + '<br>',
+                               msg: 'Impossible de valider : <br>' + msg + '<br>',
                                buttons: Ext.Msg.OK,               
                                icon: Ext.MessageBox.WARNING 
                             });
+                }
+                
+                ,validResponse:function(form, action) {
+                       if (action && action.result && action.result.success) {
+                           this.submitSuccess();
+                       }
+                       else {
+                            this.submitError(action && action.result && action.result.msg || 'erreur');
+                            
                        }
                 }
                 ,invalid:function() {

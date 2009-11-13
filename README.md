@@ -1,11 +1,11 @@
 django-extjs-forms
 ==================
 
-Django Form and ModelForm power in your ExtJs apps
+Django [Form][1] and [ModelForm][2] power in your [ExtJs][3] apps
 
 Convert your forms.Form and forms.ModelForm to extjs and handles the form submission like any django form.
 
-Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed !
+Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed  : <julien@bouquillon.com>
 
 
 **Usage :**
@@ -62,7 +62,7 @@ Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed !
 
 **Dependencies :**
 
-  - The lib includes [Saki's Ext.ux.form.DateTime][1] ExtJs component (LGPL)
+  - The lib includes [Saki's Ext.ux.form.DateTime][4] ExtJs component (LGPL)
   
   
 **Todo :** 
@@ -71,7 +71,9 @@ Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed !
   - New FK creation
 
   
-  
-  
-  [1]: http://www.extjs.com/forum/showthread.php?t=22661
+  [1]: http://docs.djangoproject.com/en/dev/topics/forms/
+  [2]: http://docs.djangoproject.com/en/dev/topics/forms/modelforms/
+  [3]: http://www.extjs.com
+  [4]: http://www.extjs.com/forum/showthread.php?t=22661
+  [4]: mailto:julien@bouquillon.com
  
