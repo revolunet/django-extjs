@@ -23,15 +23,15 @@ class ExtJsForm(object):
         cls.as_extjs = self.as_extjs
         cls.html_errorlist = self.html_errorlist
         # default submit handler 
-        handler = "function(btn) {var form=btn.ownerCt.getForm(); if (form.isValid()) {form.submit({success:ExtJsForm_validResponse,failure:ExtJsForm_validResponse});} else {ExtJsForm_incompleteForm()} }"
+        handler = "function(btn) {this.findParentByType('DjangoForm').submitForm()}"
         cls.ext_baseConfig = {
             'labelWidth':150
             ,'frame':True
             ,'iconCls':'icon-genericforms'
             ,'autoHeight':True
             ,'buttons':[
-                {'xtype':'button', 'iconCls':'icon-genericforms-accept', 'text':'enregistrer', 'handler':handler}
-               ,{'xtype':'button', 'iconCls':'icon-genericforms-cancel', 'text':'reset', 'handler':"function(btn) {var form=btn.ownerCt.getForm(); form.reset();}"}
+                {'xtype':'button', 'iconCls':'icon-genericforms-accept', 'text':'enregistrer', 'handler':handler,}
+               ,{'xtype':'button', 'iconCls':'icon-genericforms-cancel', 'text':'reset', 'handler':"function(btn) {this.reset();}"}
                 ]
         }
         

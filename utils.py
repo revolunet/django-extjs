@@ -79,7 +79,8 @@ def JSONserialise(obj):
 def JSONserialise_dict(inDict):
     data=[]
     for key in inDict.keys():
-        if key in ['store', 'listeners', 'fn', 'handler', 'failure', 'success']:
+        # skip quotes for ExtJs reserved names  
+        if key in ['store', 'listeners', 'fn', 'handler', 'failure', 'success', 'scope']:
             val = inDict[key]
             if u'%s' % val in ['True', 'False']:
                 val = str(val).lower()

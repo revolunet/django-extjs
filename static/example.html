@@ -34,8 +34,7 @@
              }
              
              
-             // simplest example of a django generated Form (EmailFormExample)
-             // its loaded then displayed in a new window
+             // my working example
              function openRappel() {
                 // as loading is asynchronous you need to declare a callback
                   var w = new Ext.Window({
@@ -46,7 +45,17 @@
                         ,autoHeight:true
                       
                     });
-                 var a = new Ext.ux.DjangoForm({url:'/apps/rappels/form_rappel', callback:function(form) {w.add(form);w.show();}});
+                 var a = new Ext.ux.DjangoForm({
+                     url:'/apps/rappels/form_rappel'
+                    ,callback:function(form) {w.add(form);w.show();}
+                    ,baseParams:{
+                            'content_type':'form.Famille'
+                            ,'object_id':709
+                        }
+                    });
+                 a.on('submitSuccess', function() {
+                    w.close();
+                });
              }
              
              
