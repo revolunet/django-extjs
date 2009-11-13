@@ -18,17 +18,21 @@ Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed !
   - Open your form from ExtJs:
   
         // simplest example of a django generated Form (EmailFormExample)
-        // its loaded then displayed in a new window
+        // its ajax loaded then displayed in a new window
         function openForm() {
-        // as loading is asynchronous you need to declare a callback
-          var w = new Ext.Window({
+         // we first declare a window where the form will appear
+          var window_form = new Ext.Window({
                 title:'simple django Form'
                 ,autoWidth:true
                 ,autoScroll:true
                 ,autoHeight:true
-              
             });
-         var a = new Ext.ux.DjangoForm({url:'/apps/django_extjs/example_email', callback:function(form) {w.add(form);w.show();}});
+          // then we ask our form to load and display the window when done
+          var django_form = new Ext.ux.DjangoForm({url:'/apps/django_extjs/example_email', callback:function(form) {window_form.add(form);window_form.show();}});
+          // we want to auto close the window on form submit success
+          django_form.on('submitSuccess', function() {
+                    window_form.close();
+                });
         }
              
   
