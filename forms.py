@@ -23,17 +23,11 @@ class ExtJsForm(object):
         cls.as_extjs = self.as_extjs
         cls.html_errorlist = self.html_errorlist
         # default submit handler 
-        handler_submit = "function(btn) {this.findParentByType('DjangoForm').submitForm()}"
-        handler_reset = "function(btn) {this.findParentByType('DjangoForm').getForm().reset()}"
+        handler_submit = "function(btn) {console.log(this, btn);this.findParentByType(this.form_xtype).submitForm()}"
+        handler_reset = "function(btn) {console.log(this, btn);this.findParentByType(this.form_xtype).resetForm()}"
         cls.ext_baseConfig = {
-            'labelWidth':150
-            ,'frame':True
-            ,'iconCls':'icon-genericforms'
-            ,'autoHeight':True
-            ,'buttons':[
-                {'xtype':'button', 'iconCls':'icon-genericforms-accept', 'text':'enregistrer', 'handler':handler_submit,}
-               ,{'xtype':'button', 'iconCls':'icon-genericforms-cancel', 'text':'reset', 'handler':handler_reset}
-                ]
+            
+
         }
         
     @staticmethod

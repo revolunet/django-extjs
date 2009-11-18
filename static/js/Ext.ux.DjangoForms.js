@@ -1,24 +1,48 @@
 // dynamic load of a server side form
+
+             
          Ext.ux.DjangoForm = Ext.extend(Ext.FormPanel, {
-                 url:null
+         
+                url:null
                 ,baseParamsLoad:null
                 ,callback:null
+                ,custom_config:null
+                ,default_config:null
+
                 
                 ,initComponent:function() {
-                     
+                    this.buttons = [
+                         {name:'submit', xtype:'button', iconCls:'icon-genericforms-accept', text:'enregistrer', scope:this, handler:function(args) {this.submitForm();}}
+                        ,{name:'submit', xtype:'button', iconCls:'icon-genericforms-cancel', text:'reset',  scope:this, handler:function(args) {this.resetForm();}}
+                    ]
+                    this.getDefaultButton = function(name) {
+                    
+                    }
                     this.gotFormCallback = function(response, options) {
                          var res = Ext.decode(response.responseText);
-                         console.log(res);
-                         //delete this.baseParams
-                         Ext.apply(this, res);
-                         console.log(this);
                          
+                         this.default_config = res;
+                        
+                         if (this.custom_config) {
+                            // apply custom config
+                            Ext.apply(this, this.custom_config());
+                            // add hidden fields
+                            for (var i=0;i<this.default_config.items.length;i++) {
+                                if (this.default_config.items[i].xtype == 'hidden') {
+                                   this.items.push(Ext.ComponentMgr.create(this.default_config.items[i]));
+                                    }
+                            }
+                         }
+                         else {
+                            Ext.apply(this, this.default_config);
+                         }
+                     
                          Ext.ux.DjangoForm.superclass.initComponent.apply(this, arguments);
-
+                       
                          this.callback(this);
                          this.addEvents('submitSuccess', 'submitError');
                      }
-                     var o = {output:'json'}
+                     var o = {}
                      if (this.baseParamsLoad) Ext.apply(o, this.baseParamsLoad);
                      Ext.Ajax.request({
                         url:this.url
@@ -67,7 +91,13 @@
                        icon: Ext.MessageBox.WARNING 
                     });
                 }
+                ,resetForm:function() {
+                    console.log('resetForm');
+                    this.getForm().reset();
+                }
+                
                 ,submitForm:function() {
+                    console.log('submitForm');
                     if (this.getForm().isValid()) {
                         this.getForm().submit({scope:this, success:this.validResponse,failure:this.validResponse});
                     } else {
@@ -81,35 +111,27 @@
  
              
         Ext.ux.DjangoField = function(config) {
-             var tgt = config.django_form.findBy(function(comp, form) {
-                          return (comp.name && (comp.name == config.name));
-                        });
-             var bConfig = {};
-             if (tgt.length > 0) {
-                    bConfig = tgt[0].cloneConfig();
-                    }
-             Ext.apply(bConfig, config);
 
-             return bConfig;
+                var items = config.django_form.default_config.items;
+                
+                for (var i=0;i<items.length;i++) {
+                    if (items[i].name == config.name) {
+                        
+                        var bConfig = items[i];
+                        // prevent infinite loop
+                        delete config.xtype
+                        Ext.apply(bConfig, config);
+                         
+                        return Ext.ComponentMgr.create(bConfig);     
+                        }
+                }
         }
+         
         
-        Ext.ux.DjangoHiddenFields = function(config) {
-            var tgt = config.django_form.findBy(function(comp, form) {
-                          return (comp.xtype == 'hidden');
-                        });
-            if (tgt.length==0) tgt = [{html:'empty'}];
-            console.log(tgt);
-            return new Ext.Panel({
-                hidden:true
-                ,items:tgt
-                });
-        }
-        
- 
+         
         Ext.reg("DjangoForm", Ext.ux.DjangoForm);
-        
+ 
         Ext.reg("DjangoField", Ext.ux.DjangoField);
-        
-        Ext.reg("DjangoHiddenFields", Ext.ux.DjangoHiddenFields);
+         
         
  
