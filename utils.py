@@ -3,6 +3,7 @@
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 
 
+
 def DateFormatConverter(to_extjs = None, to_python = None):
     """ convert date formats between ext and python """
     f = {}
@@ -53,7 +54,8 @@ def JsonError(error):
     return JsonResponse('{success:false, msg:"%s"}' % JsonCleanstr(error))
     
     
-def JSONserialise(obj):
+def JSONserialise(obj, sep = '"'):
+   # print 'JSONserialise', obj, type(obj)
     if type(obj)==type({}):
         return JSONserialise_dict(obj)
     elif type(obj)==type(True):
@@ -63,7 +65,7 @@ def JSONserialise(obj):
         for item in obj:
             data.append(JSONserialise(item))
         return "[%s]" % ",".join(data)
-    elif type(obj)==type(0):
+    elif type(obj) in [type(0), type(0.0)]:
         return '%s' % obj
     elif type(obj) in [type(''), type(u'')]:
         if obj == "False": 
@@ -71,22 +73,34 @@ def JSONserialise(obj):
         elif obj == "True":
             return "true"
         else:
-            return u'"%s"' % (JsonCleanstr(obj))
+            return u'%s%s%s' % (sep, JsonCleanstr(obj), sep)
     else:
         return u'%s' % obj
     return None
     
+def JSONserialise_dict_item(key, value, sep = '"'):
+    # quote the value except for ExtJs keywords
+    
+    if key in ['renderer', 'editor', 'hidden', 'sortable', 'sortInfo', 'listeners', 'view', 'failure', 'success','scope', 'fn','store','handler']:
+        if u'%s' % value in ['True', 'False']:
+             value = str(value).lower()
+        return '%s:%s' % (key, value)
+    else:
+        value = JSONserialise(value, sep)
+        return '%s:%s' % (key, value)
+     
 def JSONserialise_dict(inDict):
     data=[]
     for key in inDict.keys():
         # skip quotes for ExtJs reserved names  
-        if key in ['store', 'listeners', 'fn', 'handler', 'failure', 'success', 'scope']:
-            val = inDict[key]
-            if u'%s' % val in ['True', 'False']:
-                val = str(val).lower()
-        else:
-            val = JSONserialise(inDict[key])
-        data.append('%s:%s' % (key,val))
+        data.append(JSONserialise_dict_item(key, inDict[key]))
+        #if key in ['store', 'listeners', 'fn', 'handler', 'failure', 'success', 'scope']:
+        #    val = inDict[key]
+        #    if u'%s' % val in ['True', 'False']:
+        #        val = str(val).lower()
+        #else:
+        #    val = JSONserialise(inDict[key])
+        #data.append('%s:%s' % (key,val))
     data = ",".join(data)
     return "{%s}" % data
     

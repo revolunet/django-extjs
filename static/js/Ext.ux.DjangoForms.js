@@ -8,13 +8,16 @@
                 ,callback:null
                 ,custom_config:null
                 ,default_config:null
+                ,showButtons:true
 
                 
                 ,initComponent:function() {
-                    this.buttons = [
-                         {name:'submit', xtype:'button', iconCls:'icon-genericforms-accept', text:'enregistrer', scope:this, handler:function(args) {this.submitForm();}}
-                        ,{name:'submit', xtype:'button', iconCls:'icon-genericforms-cancel', text:'reset',  scope:this, handler:function(args) {this.resetForm();}}
-                    ]
+                    if (this.showButtons) {
+                        this.buttons = [
+                             {name:'submit', xtype:'button', iconCls:'icon-genericforms-accept', text:'enregistrer', scope:this, handler:function(args) {this.submitForm();}}
+                            ,{name:'submit', xtype:'button', iconCls:'icon-genericforms-cancel', text:'reset',  scope:this, handler:function(args) {this.resetForm();}}
+                        ]
+                        }
                     this.getDefaultButton = function(name) {
                     
                     }
