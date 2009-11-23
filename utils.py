@@ -48,10 +48,10 @@ def JsonResponse(contents, status=200):
     return HttpResponse(contents, mimetype='text/javascript', status=status)
 
 def JsonSuccess():
-    return JsonResponse('{success:true}')
+    return JsonResponse('{"success":true}')
    
 def JsonError(error):
-    return JsonResponse('{success:false, msg:"%s"}' % JsonCleanstr(error))
+    return JsonResponse('{"success":false, "msg":"%s"}' % JsonCleanstr(error))
     
     
 def JSONserialise(obj, sep = '"'):
@@ -84,10 +84,10 @@ def JSONserialise_dict_item(key, value, sep = '"'):
     if key in ['renderer', 'editor', 'hidden', 'sortable', 'sortInfo', 'listeners', 'view', 'failure', 'success','scope', 'fn','store','handler']:
         if u'%s' % value in ['True', 'False']:
              value = str(value).lower()
-        return '%s:%s' % (key, value)
+        return '"%s":%s' % (key, value)
     else:
         value = JSONserialise(value, sep)
-        return '%s:%s' % (key, value)
+        return '"%s":%s' % (key, value)
      
 def JSONserialise_dict(inDict):
     data=[]

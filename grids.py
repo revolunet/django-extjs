@@ -68,18 +68,18 @@ class ModelGrid(object):
     def to_grid(self, queryset, start = 0, limit = 0, totalcount = None):
         if not totalcount: 
             totalcount = queryset.count()
-            print 'totalcount', totalcount
+            #print 'totalcount', totalcount
         json =  """{
-            success:true
-            ,metaData:{
-                root:"rows",
-                totalProperty:"totalCount",
-                successProperty: "success",
-                sortInfo:{
-                   field: "id",
-                   direction: "DESC"
+            "success":true
+            ,"metaData":{
+                "root":"rows",
+                "totalProperty":"totalCount",
+               "successProperty": "success",
+                "sortInfo":{
+                   "field": "id",
+                   "direction": "DESC"
                 },
-                fields:"""
+                "fields":"""
         json +=  utils.JSONserialise(self.fields)
         json += "},\n"
         if queryset:
@@ -89,7 +89,7 @@ class ModelGrid(object):
                 #queryset = paginator.page(page).object_list
                 queryset = queryset[int(start):int(start) + int(limit)]
                 #queryset[
-            json += """rows:\n"""
+            json += """"rows":\n"""
             json += '['
             fields_items = []
             for item in queryset:
@@ -122,8 +122,8 @@ class ModelGrid(object):
             json += ','.join(fields_items)
             json += ']\n'
         else:
-            json += 'rows:[]'
-        json += """\n,totalCount:%s""" % totalcount
+            json += '"rows":[]'
+        json += """\n,"totalCount":%s""" % totalcount
         json += "}\n"
         return json 
     class Meta:

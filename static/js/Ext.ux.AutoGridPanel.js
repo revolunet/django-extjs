@@ -1,6 +1,6 @@
 
 Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
-  
+    	deferredRender :false,
      initComponent: function() {
   
         if (this.columns && (this.columns instanceof Array)) {
@@ -15,11 +15,12 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
         // register to the store's metachange event
         if (this.store) {
              
-             this.store.on("load", this.onStoreLoad, this);
+           // this.store.on("load", this.onStoreLoad, this);
              this.store.on("metachange", this.onMetaChange, this);
-              //this.store.on("beforeload", function() {this.getGridEl().mask({msg:'loading...'})}, this);
-             this.store.on("loadexception ", function() {alert('loadexception ')}, this);
-           //this.store.on("load", function() {this.getGridEl().unmask()}, this);
+       //     this.store.on("beforeload", function() {alert('beforeload')}, this);
+        //     this.store.on("loadexception ", function() {alert('loadexception ')}, this);
+       //    this.store.on("load", function() {alert('load');}, this);
+
         }
         // Store the column model to the server on change
         if (this.autoSave) {
@@ -61,7 +62,7 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
          
         for (var i = 0, len = meta.fields.length; i < len; i++) {
             c = meta.fields[i];
-           // alert(c.name);
+         
             if (c.header !== undefined) {
                 if (typeof c.dataIndex == "undefined") {
                     c.dataIndex = c.name;
@@ -86,9 +87,16 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
         this.colModel.config = config;
         this.colModel.lookup = lookup;
         // Re-render grid
-        
-        if (this.rendered) {
-            this.view.refresh(true);
+        //alert(this.rendered);
+        if (this.rendered) {    
+            //alert(this.getView().refresh);
+            //this.reconfigure(this.store, this.colModel);
+            //this.getView().refresh(true);
+           // alert('view refreshed');
+           // alert(this.view.mainBody);
+           
+             this.getColumnModel().setConfig(this.store.reader.jsonData.metaData.fields);         
+            this.getView().syncFocusEl(0);
         }
 
         this.view.hmenu.add(
@@ -102,8 +110,10 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
         if((true === view.forceFit) || (true === this.forceFit)) {
             view.fitColumns(); 
         }
+        
         //alert('onStoreLoad 2');
     },
+ 
 
     saveColumModel: function() {
         // Get Id, width and hidden propery from every column
