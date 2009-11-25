@@ -65,12 +65,13 @@ class ModelGrid(object):
         #for field in self.model:
         #    print field
         
-    def to_grid(self, queryset, start = 0, limit = 0, totalcount = None):
+    def to_grid(self, queryset, start = 0, limit = 0, totalcount = None, json_add = ""):
         if not totalcount: 
             totalcount = queryset.count()
             #print 'totalcount', totalcount
         json =  """{
             "success":true
+            %s
             ,"metaData":{
                 "root":"rows",
                 "totalProperty":"totalCount",
@@ -79,7 +80,7 @@ class ModelGrid(object):
                    "field": "id",
                    "direction": "DESC"
                 },
-                "fields":"""
+                "fields":""" % json_add
         json +=  utils.JSONserialise(self.fields)
         json += "},\n"
         if queryset:

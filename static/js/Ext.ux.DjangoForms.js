@@ -6,6 +6,7 @@
                 url:null
                 ,baseParamsLoad:null
                 ,callback:null
+                ,scope:null
                 ,custom_config:null
                 ,default_config:null
                 ,showButtons:true
@@ -41,8 +42,10 @@
                          }
                      
                          Ext.ux.DjangoForm.superclass.initComponent.apply(this, arguments);
-                       
-                         this.callback(this);
+                        //this.callback(this);
+                         this.callback.createDelegate(this.scope, [this])();
+                         // console.log(a);
+                         // a();
                          this.addEvents('submitSuccess', 'submitError');
                      }
                      var o = {}
