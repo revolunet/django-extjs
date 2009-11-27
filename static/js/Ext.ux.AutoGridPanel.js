@@ -28,6 +28,7 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
             this.colModel.on("hiddenchange", this.saveColumModel, this);
             this.colModel.on("columnmoved", this.saveColumModel, this);
             this.colModel.on("columnlockchange", this.saveColumModel, this);
+            this.on("columnresize", this.saveColumModel, this);
         }
 
         
@@ -100,7 +101,7 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
         }
 
         this.view.hmenu.add(
-            { id: "reset", text: "Reset Columns", cls: "xg-hmenu-reset-columns" }
+            { id: "reset", text: "Réinitialiser les colonnes", cls: "xg-hmenu-reset-columns", handler:function(btn, event) {this.razColumModel();}, scope:this }
         );
     },
 
@@ -114,9 +115,23 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
         //alert('onStoreLoad 2');
     },
  
-
+    razColumModel: function() {
+        Ext.Ajax.request({
+            url: this.saveUrl,
+            params: { raz:true },
+            scope:this,
+            success: function() {
+                this.store.reload();
+            
+            }
+ 
+            
+        })
+    },
+    
     saveColumModel: function() {
         // Get Id, width and hidden propery from every column
+       // console.log('saveColumModel');
         var c, config = this.colModel.config;
         var fields = [];
         for (var i = 0, len = config.length; i < len; i++) {

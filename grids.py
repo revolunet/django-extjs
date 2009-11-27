@@ -65,7 +65,7 @@ class ModelGrid(object):
         #for field in self.model:
         #    print field
         
-    def to_grid(self, queryset, start = 0, limit = 0, totalcount = None, json_add = ""):
+    def to_grid(self, queryset, start = 0, limit = 0, totalcount = None, json_add = "", colModel = None):
         if not totalcount: 
             totalcount = queryset.count()
             #print 'totalcount', totalcount
@@ -81,7 +81,24 @@ class ModelGrid(object):
                    "direction": "DESC"
                 },
                 "fields":""" % json_add
-        json +=  utils.JSONserialise(self.fields)
+        
+        base_fields = self.fields
+        if colModel and colModel.get('fields'):
+            base_fields = []
+            # width, name, hidden
+            for f in colModel['fields']:
+                for cf in self.fields:
+                    print cf, f
+                    if cf['name'] == f['name']:
+                        print 'found colModel for field %s' % f['name']
+                        config_field = cf
+                        if f.get('width'):
+                            config_field['width'] = f.get('width')
+                        if f.get('hidden'):                        
+                            config_field['hidden'] = f.get('hidden')
+                        base_fields.append(config_field)
+        
+        json +=  utils.JSONserialise(base_fields)
         json += "},\n"
         if queryset:
             if start > 0 and limit > 0:
@@ -96,7 +113,7 @@ class ModelGrid(object):
             for item in queryset:
                 idx = 0
                 field_items = []
-                for field in self.fields:
+                for field in base_fields:
                     val = getattr(item, field['name'], '')
                    # print field, val
                     if val:
