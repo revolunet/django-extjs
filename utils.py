@@ -1,8 +1,44 @@
+import datetime
+import pickle
 
 # extjs special encoder
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 
 
+def set_cookie(response, key, value, days_expire = 7):
+    if days_expire is None:
+        max_age = 365*24*60*60  #one year
+    else:
+        max_age = days_expire*24*60*60 
+        
+    expires = datetime.datetime.strftime(datetime.datetime.utcnow() + datetime.timedelta(seconds=max_age), "%a, %d-%b-%Y %H:%M:%S GMT")
+    response.set_cookie(key, value, max_age=max_age, expires=expires)
+    return response
+    
+def set_pickle_cookie(response, key, value, days_expire = 7):
+    if days_expire is None:
+        max_age = 365*24*60*60  #one year
+    else:
+        max_age = days_expire*24*60*60 
+    value = pickle.dumps(value)
+    expires = datetime.datetime.strftime(datetime.datetime.utcnow() + datetime.timedelta(seconds=max_age), "%a, %d-%b-%Y %H:%M:%S GMT")
+    response.set_cookie(key, value, max_age=max_age, expires=expires)
+    return response  
+    
+    return pickle.loads(value) 
+    
+def get_pickle_cookie(request, key):
+    value = request.COOKIES.get(key)
+    if value:
+        try:
+            value = pickle.loads(value) 
+        except:
+            print ' * ERROR unpickling cookie %s' % key
+            value = None
+    return value
+    
+def get_cookie(request, key):
+    return request.COOKIES.get(key)
 
 def DateFormatConverter(to_extjs = None, to_python = None):
     """ convert date formats between ext and python """
@@ -55,7 +91,7 @@ def JsonError(error):
     
     
 def JSONserialise(obj, sep = '"'):
-   # print 'JSONserialise', obj, type(obj)
+    
     if type(obj)==type({}):
         return JSONserialise_dict(obj)
     elif type(obj)==type(True):
@@ -65,8 +101,10 @@ def JSONserialise(obj, sep = '"'):
         for item in obj:
             data.append(JSONserialise(item))
         return "[%s]" % ",".join(data)
-    elif type(obj) in [type(0), type(0.0)]:
+    elif type(obj) in [type(0), type(0.0), long]:
         return '%s' % obj
+    elif type(obj) in [datetime.datetime , datetime.date]:
+         return u'%s%s%s' % (sep, obj, sep)
     elif type(obj) in [type(''), type(u'')]:
         if obj == "False": 
            return "false"
@@ -75,6 +113,7 @@ def JSONserialise(obj, sep = '"'):
         else:
             return u'%s%s%s' % (sep, JsonCleanstr(obj), sep)
     else:
+        #print 'JSONserialise', obj, type(obj)
         return u'%s' % obj
     return None
     

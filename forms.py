@@ -69,7 +69,7 @@ class ExtJsForm(object):
                 ofield = self.fields[field]
                 #print dir(ofield)
                 #print dir(ofield)
-                #print '************',field, ofield
+                #print '************',field, ofield, ofield.__class__.__name__
                 extfield = None
                 defaultConfig = {}
                 defaultConfig['name'] = field
