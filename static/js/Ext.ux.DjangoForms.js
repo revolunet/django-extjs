@@ -42,14 +42,14 @@
                          }
                      
                          Ext.ux.DjangoForm.superclass.initComponent.apply(this, arguments);
-                        //this.callback(this);
+                         
                          this.callback.createDelegate(this.scope, [this])();
-                         // console.log(a);
-                         // a();
+                         
                          this.addEvents('submitSuccess', 'submitError');
                      }
                      var o = {}
                      if (this.baseParamsLoad) Ext.apply(o, this.baseParamsLoad);
+                //     console.log(o);
                      Ext.Ajax.request({
                         url:this.url
                         ,params:o
@@ -125,9 +125,17 @@
                         
                         var bConfig = items[i];
                         // prevent infinite loop
+                        
+                        if (config.xtype2) {
+                            config.xtype = config.xtype2
+                            }
+                       else {
                         delete config.xtype
+                       }
+                      
                         Ext.apply(bConfig, config);
-                         
+                      // console.log(bConfig); 
+                        
                         return Ext.ComponentMgr.create(bConfig);     
                         }
                 }
