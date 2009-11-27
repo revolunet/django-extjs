@@ -101,7 +101,7 @@ class ModelGrid(object):
         json +=  utils.JSONserialise(base_fields)
         json += "},\n"
         if queryset:
-            if start > 0 and limit > 0:
+            if limit > 0:
                 #from django.core.paginator import Paginator
                 #paginator = Paginator(queryset, limit)
                 #queryset = paginator.page(page).object_list
