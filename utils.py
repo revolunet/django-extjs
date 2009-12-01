@@ -83,8 +83,10 @@ def DateFormatConverter(to_extjs = None, to_python = None):
 def JsonResponse(contents, status=200):
     return HttpResponse(contents, mimetype='text/javascript', status=status)
 
-def JsonSuccess():
-    return JsonResponse('{"success":true}')
+def JsonSuccess(params = {}):
+    d = {"success":True}
+    d.update(params)
+    return JsonResponse(JSONserialise(d))
    
 def JsonError(error):
     return JsonResponse('{"success":false, "msg":"%s"}' % JsonCleanstr(error))

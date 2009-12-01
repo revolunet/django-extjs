@@ -10,13 +10,13 @@
                 ,custom_config:null
                 ,default_config:null
                 ,showButtons:true
-
+                ,showSuccessMessage:'Formulaire bien enregistre'
                 
                 ,initComponent:function() {
                     if (this.showButtons) {
                         this.buttons = [
-                             {name:'submit', xtype:'button', iconCls:'icon-genericforms-accept', text:'enregistrer', scope:this, handler:function(args) {this.submitForm();}}
-                            ,{name:'submit', xtype:'button', iconCls:'icon-genericforms-cancel', text:'reset',  scope:this, handler:function(args) {this.resetForm();}}
+                             {name:'submit', xtype:'button', iconCls:'icon-accept', text:'enregistrer', scope:this, handler:function(args) {this.submitForm();}}
+                            ,{name:'submit', xtype:'button', iconCls:'icon-cancel', text:'reset',  scope:this, handler:function(args) {this.resetForm();}}
                         ]
                         }
                     this.getDefaultButton = function(name) {
@@ -26,7 +26,6 @@
                          var res = Ext.decode(response.responseText);
                          
                          this.default_config = res;
-                        
                          if (this.custom_config) {
                             // apply custom config
                             Ext.apply(this, this.custom_config());
@@ -34,6 +33,7 @@
                             for (var i=0;i<this.default_config.items.length;i++) {
                                 if (this.default_config.items[i].xtype == 'hidden') {
                                    this.items.push(Ext.ComponentMgr.create(this.default_config.items[i]));
+                               //    console.log('add hidden field', this.default_config.items[i]);
                                     }
                             }
                          }
@@ -62,12 +62,14 @@
                 }
               ,submitSuccess:function() {
                      this.fireEvent('submitSuccess');
-                     Ext.Msg.show({
-                       title:'Succes',
-                       msg: 'Formulaire bien enregistre',
-                       buttons: Ext.Msg.OK,               
-                       icon: Ext.MessageBox.INFO 
-                    });
+                     if (this.showSuccessMessage) {
+                         Ext.Msg.show({
+                           title:'Succes',
+                           msg: this.showSuccessMessage,
+                           buttons: Ext.Msg.OK,               
+                           icon: Ext.MessageBox.INFO 
+                        });
+                   }
                 }
                 ,submitError:function(msg) {
                 
@@ -90,6 +92,7 @@
                        }
                 }
                 ,invalid:function() {
+                //    console.log('invalid: ', this.getForm().getValues());
                      Ext.Msg.show({
                        title:'Erreur',
                        msg: 'Impossible de valider : formulaire invalide',
@@ -103,10 +106,15 @@
                 }
                 
                 ,submitForm:function() {
-                    console.log('submitForm');
+                    //console.log('submitForm');
                     if (this.getForm().isValid()) {
                         this.getForm().submit({scope:this, success:this.validResponse,failure:this.validResponse});
                     } else {
+                        // console.log('invalid form!');
+                         // var items = this.getForm().items.items;
+                        // for (f in items) {
+                            // console.log(f, items[f], items[f].isValid());
+                        // }
                         this.invalid()
                         }
                    }                      
@@ -117,7 +125,7 @@
  
              
         Ext.ux.DjangoField = function(config) {
-
+               // console.log(config);
                 var items = config.django_form.default_config.items;
                 
                 for (var i=0;i<items.length;i++) {
