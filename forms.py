@@ -31,12 +31,12 @@ class ExtJsForm(object):
         }
         
     @staticmethod
-    def as_extjs(self):
+    def as_extjs(self, excludes = []):
         config = ""
         config_dict = self.ext_baseConfig
         if getattr(self, 'ext_config', None):
             config_dict.update(self.ext_config)
-        config_dict['items'] = self.as_extjsfields()
+        config_dict['items'] = self.as_extjsfields(excludes = excludes)
         #if len(config_dict.items())>0:
             #config = utils.JSONserialise(config_dict)
         return utils.JSONserialise(config_dict)
@@ -49,7 +49,7 @@ class ExtJsForm(object):
         return html
         
     @staticmethod
-    def as_extjsfields(self):
+    def as_extjsfields(self, excludes = []):
             ext_fields = []
             
             if getattr(self, 'intro', None):
@@ -66,10 +66,11 @@ class ExtJsForm(object):
                     #print 'FIELD INSTANCE :', lfield
                     #print dir(lfield)
             for field in self.fields:
+                if field in excludes: continue
                 ofield = self.fields[field]
                 #print dir(ofield)
                 #print dir(ofield)
-                #print '************',field, ofield
+                #print '************',field, ofield, ofield.__class__.__name__
                 extfield = None
                 defaultConfig = {}
                 defaultConfig['name'] = field

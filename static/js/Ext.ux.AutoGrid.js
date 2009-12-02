@@ -2,7 +2,8 @@
 Ext.ux.AutoGrid = Ext.extend(Ext.ux.AutoGridPanel, {
      showBbar:false
     ,stripeRows:true
- 
+    ,deferredRender :true
+    ,autoSave:false
     ,initComponent:function() {
         this.pagesize = this.pagesize || 10;
         
@@ -18,7 +19,7 @@ Ext.ux.AutoGrid = Ext.extend(Ext.ux.AutoGridPanel, {
             store:  this.store
             ,stripeRows: true
             ,loadMask: true
-            ,autoSave: false
+            ,autoSave: this.autoSave
         };
         Ext.apply(this.initialConfig, config);
         Ext.ux.AutoGrid.superclass.initComponent.apply(this, arguments);

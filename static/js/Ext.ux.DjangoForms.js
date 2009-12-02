@@ -6,16 +6,17 @@
                 url:null
                 ,baseParamsLoad:null
                 ,callback:null
+                ,scope:null
                 ,custom_config:null
                 ,default_config:null
                 ,showButtons:true
-
+                ,showSuccessMessage:'Formulaire bien enregistre'
                 
                 ,initComponent:function() {
                     if (this.showButtons) {
                         this.buttons = [
-                             {name:'submit', xtype:'button', iconCls:'icon-genericforms-accept', text:'enregistrer', scope:this, handler:function(args) {this.submitForm();}}
-                            ,{name:'submit', xtype:'button', iconCls:'icon-genericforms-cancel', text:'reset',  scope:this, handler:function(args) {this.resetForm();}}
+                             {name:'submit', xtype:'button', iconCls:'icon-accept', text:'enregistrer', scope:this, handler:function(args) {this.submitForm();}}
+                            ,{name:'submit', xtype:'button', iconCls:'icon-cancel', text:'reset',  scope:this, handler:function(args) {this.resetForm();}}
                         ]
                         }
                     this.getDefaultButton = function(name) {
@@ -25,7 +26,6 @@
                          var res = Ext.decode(response.responseText);
                          
                          this.default_config = res;
-                        
                          if (this.custom_config) {
                             // apply custom config
                             Ext.apply(this, this.custom_config());
@@ -33,6 +33,7 @@
                             for (var i=0;i<this.default_config.items.length;i++) {
                                 if (this.default_config.items[i].xtype == 'hidden') {
                                    this.items.push(Ext.ComponentMgr.create(this.default_config.items[i]));
+                               //    console.log('add hidden field', this.default_config.items[i]);
                                     }
                             }
                          }
@@ -41,12 +42,14 @@
                          }
                      
                          Ext.ux.DjangoForm.superclass.initComponent.apply(this, arguments);
-                       
-                         this.callback(this);
+                         
+                         this.callback.createDelegate(this.scope, [this])();
+                         
                          this.addEvents('submitSuccess', 'submitError');
                      }
                      var o = {}
                      if (this.baseParamsLoad) Ext.apply(o, this.baseParamsLoad);
+                //     console.log(o);
                      Ext.Ajax.request({
                         url:this.url
                         ,params:o
@@ -59,12 +62,14 @@
                 }
               ,submitSuccess:function() {
                      this.fireEvent('submitSuccess');
-                     Ext.Msg.show({
-                       title:'Succes',
-                       msg: 'Formulaire bien enregistre',
-                       buttons: Ext.Msg.OK,               
-                       icon: Ext.MessageBox.INFO 
-                    });
+                     if (this.showSuccessMessage) {
+                         Ext.Msg.show({
+                           title:'Succes',
+                           msg: this.showSuccessMessage,
+                           buttons: Ext.Msg.OK,               
+                           icon: Ext.MessageBox.INFO 
+                        });
+                   }
                 }
                 ,submitError:function(msg) {
                 
@@ -87,6 +92,7 @@
                        }
                 }
                 ,invalid:function() {
+                //    console.log('invalid: ', this.getForm().getValues());
                      Ext.Msg.show({
                        title:'Erreur',
                        msg: 'Impossible de valider : formulaire invalide',
@@ -100,10 +106,15 @@
                 }
                 
                 ,submitForm:function() {
-                    console.log('submitForm');
+                    //console.log('submitForm');
                     if (this.getForm().isValid()) {
                         this.getForm().submit({scope:this, success:this.validResponse,failure:this.validResponse});
                     } else {
+                        // console.log('invalid form!');
+                         // var items = this.getForm().items.items;
+                        // for (f in items) {
+                            // console.log(f, items[f], items[f].isValid());
+                        // }
                         this.invalid()
                         }
                    }                      
@@ -114,7 +125,7 @@
  
              
         Ext.ux.DjangoField = function(config) {
-
+               // console.log(config);
                 var items = config.django_form.default_config.items;
                 
                 for (var i=0;i<items.length;i++) {
@@ -122,9 +133,17 @@
                         
                         var bConfig = items[i];
                         // prevent infinite loop
+                        
+                        if (config.xtype2) {
+                            config.xtype = config.xtype2
+                            }
+                       else {
                         delete config.xtype
+                       }
+                      
                         Ext.apply(bConfig, config);
-                         
+                      // console.log(bConfig); 
+                        
                         return Ext.ComponentMgr.create(bConfig);     
                         }
                 }

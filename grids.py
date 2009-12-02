@@ -18,8 +18,8 @@ class ModelGrid(object):
         
         excludes = getattr(self.Meta, 'exclude', [])
         # reorder cols if needed
-        order = getattr(self.Meta, 'order')
-        if len(order) > 0:
+        order = getattr(self.Meta, 'order', None)
+        if order and len(order) > 0:
             base_fields  = []
             for field in order:
                 added = False
@@ -55,7 +55,7 @@ class ModelGrid(object):
                 fdict['type'] = 'boolean'
             elif field.__class__.__name__ == 'DecimalField':
                 fdict['type'] = 'float'
-                fdict['renderer'] = 'function(v) {return v.toFixed(2);}'
+                fdict['renderer'] = 'function(v) {return (v.toFixed && v.toFixed(2) || 0);}'
             elif  field.__class__.__name__ == 'ForeignKey':
                 pass
             if getattr(self.Meta, 'fields_conf', {}).has_key(field.name):
@@ -65,12 +65,13 @@ class ModelGrid(object):
         #for field in self.model:
         #    print field
         
-    def to_grid(self, queryset, start = 0, limit = 0, totalcount = None):
+    def to_grid(self, queryset, start = 0, limit = 0, totalcount = None, json_add = "", colModel = None):
         if not totalcount: 
             totalcount = queryset.count()
             #print 'totalcount', totalcount
         json =  """{
             "success":true
+            %s
             ,"metaData":{
                 "root":"rows",
                 "totalProperty":"totalCount",
@@ -79,11 +80,27 @@ class ModelGrid(object):
                    "field": "id",
                    "direction": "DESC"
                 },
-                "fields":"""
-        json +=  utils.JSONserialise(self.fields)
+                "fields":""" % json_add
+        
+        base_fields = self.fields
+        if colModel and colModel.get('fields'):
+            base_fields = []
+            for f in colModel['fields']:    
+               # print f, base_fields
+                for cf in self.fields:
+                   # print cf
+                    if cf['name'] == f['name']:
+                        #print 'found colModel for field %s' % f['name']
+                        config_field = cf
+                        if f.get('width'):
+                            config_field['width'] = f.get('width')
+                        if f.get('hidden'):                        
+                            config_field['hidden'] = f.get('hidden')
+                        base_fields.append(config_field)
+        json +=  utils.JSONserialise(base_fields)
         json += "},\n"
         if queryset:
-            if start > 0 and limit > 0:
+            if limit > 0:
                 #from django.core.paginator import Paginator
                 #paginator = Paginator(queryset, limit)
                 #queryset = paginator.page(page).object_list
@@ -95,7 +112,7 @@ class ModelGrid(object):
             for item in queryset:
                 idx = 0
                 field_items = []
-                for field in self.fields:
+                for field in base_fields:
                     val = getattr(item, field['name'], '')
                    # print field, val
                     if val:
@@ -111,12 +128,7 @@ class ModelGrid(object):
                         else:
                             val = ''
                     astr = utils.JSONserialise_dict_item(field['name'], val)
-                    #print 'astr', astr, field
                     field_items.append(astr)
-                    #u""""%s":"%s" """ % (, val))
-                    #json+= 
-                    #if field != self.fields[-1]: json += ","
-                    
                     idx += 1
                 fields_items.append('{%s}' % ','.join(field_items))
             json += ','.join(fields_items)
@@ -129,62 +141,3 @@ class ModelGrid(object):
     class Meta:
         pass
 
-
-#agrid.fields.append({'name':'adresse', 'header': 'adresse','width':100,  'editor': 'new Ext.form.TextField()'})
-
-
-def gridToJson(agrid,start=0, limit=0, meta=True, raw_rows = None, total = None, json_supp=None, show_empty_rows = False):
-    json = "{"
-    fields = agrid['fields']
-    rows = agrid['rows']
-    totalcount = total and total or len(rows)
-    if start>0: rows = rows[int(start):]
-    if limit>0: rows = rows[:int(limit)]
-    if meta:
-        metas = ""
-        # if agrid.get('metas', None):
-            # metas = ",\n".join([JSONserialise_dict_item(k, agrid['metas'][k]) for k in agrid['metas'].keys()])
-        ####    etas = ",\n".join(['"%s":%s' % (k,jsonFieldvalue(agrid['metas'][k], itemName=k)) ])
-            # metas += ","
-        json += """
-            "metaData":{
-                %s
-                "root":"rows",
-                "totalProperty":"totalCount",
-                "fields":[\n""" % (metas)
-        # for item in fields:
-            # autofields = ""
-            # autofields = ",\n".join([JSONserialise_dict_item(k, agrid['metas'][k]) for k in item.keys()])
-      ###     a utofields = ",".join(['"%s":%s' % (k,jsonFieldvalue(item[k], itemName=k)) for k in item.keys()])
-            # json += """{%s}""" % autofields
-            # if item != fields[-1]: json += ",\n"
-        json += "]},\n"
-        
-    
-    if raw_rows: 
-        json += '"rows":%s,\n' % raw_rows
-    
-    elif len(rows) > 0 :
-        json += """"rows":\n"""
-        json += '['
-        for item in rows:
-            idx = 0
-            json += "{"
-            for field in fields:
-                #print (field['name'], item[idx])
-                json+= u""""%s":"%s" """ % (field['name'], item[idx])
-                if field != fields[-1]: json += ","
-                idx += 1
-            json += "}"    
-            if item != rows[-1]: json += ",\n"
-        json += "],\n"
-    elif show_empty_rows:
-        json += '"rows":[],'
-            
-    if json_supp:
-        json += json_supp
-    if totalcount: 
-        json += """"totalCount":%s""" % totalcount
-    json += "}\n"
-    return json
-    
