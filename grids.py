@@ -85,19 +85,18 @@ class ModelGrid(object):
         base_fields = self.fields
         if colModel and colModel.get('fields'):
             base_fields = []
-            # width, name, hidden
-            for f in colModel['fields']:
+            for f in colModel['fields']:    
+               # print f, base_fields
                 for cf in self.fields:
-                    print cf, f
+                   # print cf
                     if cf['name'] == f['name']:
-                        print 'found colModel for field %s' % f['name']
+                        #print 'found colModel for field %s' % f['name']
                         config_field = cf
                         if f.get('width'):
                             config_field['width'] = f.get('width')
                         if f.get('hidden'):                        
                             config_field['hidden'] = f.get('hidden')
                         base_fields.append(config_field)
-        
         json +=  utils.JSONserialise(base_fields)
         json += "},\n"
         if queryset:
@@ -129,12 +128,7 @@ class ModelGrid(object):
                         else:
                             val = ''
                     astr = utils.JSONserialise_dict_item(field['name'], val)
-                    #print 'astr', astr, field
                     field_items.append(astr)
-                    #u""""%s":"%s" """ % (, val))
-                    #json+= 
-                    #if field != self.fields[-1]: json += ","
-                    
                     idx += 1
                 fields_items.append('{%s}' % ','.join(field_items))
             json += ','.join(fields_items)
