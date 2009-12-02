@@ -5,7 +5,11 @@ Django [Form][1] and [ModelForm][2] power in your [ExtJs][3] apps
 
 Convert your forms.Form and forms.ModelForm to extjs and handles the form submission like any django form.
 
-Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed  : <julien@bouquillon.com>
+Generate custom ExtJs dynamic grids from django models.
+
+Tested with ExtJs 3 and Django >= 1 Feedback needed  : <julien@bouquillon.com>
+
+(used to work with ExtJs 1.2  (this [commit][5] may have broken this, not tested)
 
 
 **Usage :**
@@ -40,7 +44,8 @@ Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed  : <julien@bouquillon.co
 
   - Django code to render your forms as extjs
   - ExtJs helpers to load/save your forms and models
-  - A special ExtJs json parser
+  - Django code to generate full json to render ExtJS grids with paging (metaData + data)
+  - A special ExtJs json parser (special ExtJs keywords handling)
 
 **Features :**
 
@@ -63,11 +68,13 @@ Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed  : <julien@bouquillon.co
 **Dependencies :**
 
   - The lib includes [Saki's Ext.ux.form.DateTime][4] ExtJs component (LGPL)
+  - Also includes Ext.ux.AutoGrid and Ext.ux.AutoGridPanel
   
   
 **Todo :** 
 
   - Radio groups
+  - Fieldsets
   - New FK creation
 
   
@@ -75,5 +82,5 @@ Tested with ExtJs 1.2 and Django 1.0.2. Feedback needed  : <julien@bouquillon.co
   [2]: http://docs.djangoproject.com/en/dev/topics/forms/modelforms/
   [3]: http://www.extjs.com
   [4]: http://www.extjs.com/forum/showthread.php?t=22661
-  [4]: mailto:julien@bouquillon.com
+  [5]: http://github.com/julienb/django-extjs/commit/3fbad2437db07adef645cbf132659932533e1e95#diff-2
  
