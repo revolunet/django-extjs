@@ -53,7 +53,7 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
         // console.log('autogrid onRender');
     // },
     onMetaChange: function(store, meta) {
-   //console.log("onMetaChange", meta.fields);
+    //console.log("onMetaChange", meta.fields);
         // loop for every field, only add fields with a header property (modified copy from ColumnModel constructor)
         //alert('store onmetachange');
         var c;

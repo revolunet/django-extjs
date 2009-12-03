@@ -4,6 +4,31 @@ import utils
 # width, dateFormat, renderer, hidden, align, type
 
 
+class SimpleGrid(object):
+    def to_grid(self, fields, rows, totalcount = None, json_add = ""):
+        if not totalcount: 
+            totalcount = len(rows)
+            #print 'totalcount', totalcount
+        json =  """{
+            "success":true
+            %s
+            ,"metaData":{
+                "root":"rows",
+                "totalProperty":"totalCount",
+               "successProperty": "success",
+                "sortInfo":{
+                   "field": "commercial",
+                   "direction": "DESC"
+                },
+                "fields":""" % json_add
+        json += utils.JSONserialise(fields)
+        json += '}\n,"rows":\n'
+        json += utils.JSONserialise(rows)
+        json += '\n,"totalCount":%s' % totalcount
+        json += "}\n"
+        return json 
+
+
 class VirtualField(object):
     def __init__(self, name):
         self.name = name
@@ -99,17 +124,16 @@ class ModelGrid(object):
                         base_fields.append(config_field)
         json +=  utils.JSONserialise(base_fields)
         json += "},\n"
+        #print 'queryset', queryset
         if queryset:
             if limit > 0:
-                #from django.core.paginator import Paginator
-                #paginator = Paginator(queryset, limit)
-                #queryset = paginator.page(page).object_list
+                #print start, limit
                 queryset = queryset[int(start):int(start) + int(limit)]
-                #queryset[
             json += """"rows":\n"""
             json += '['
             fields_items = []
             for item in queryset:
+                #print 'item', item
                 idx = 0
                 field_items = []
                 for field in base_fields:

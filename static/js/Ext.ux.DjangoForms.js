@@ -16,7 +16,7 @@
                     if (this.showButtons) {
                         this.buttons = [
                              {name:'submit', xtype:'button', iconCls:'icon-accept', text:'enregistrer', scope:this, handler:function(args) {this.submitForm();}}
-                            ,{name:'submit', xtype:'button', iconCls:'icon-cancel', text:'reset',  scope:this, handler:function(args) {this.resetForm();}}
+                            ,{name:'reset', xtype:'button', iconCls:'icon-cancel', text:'reset',  scope:this, handler:function(args) {this.resetForm();}}
                         ]
                         }
                     this.getDefaultButton = function(name) {
@@ -83,6 +83,10 @@
                 }
                 
                 ,validResponse:function(form, action) {
+                        for (btn in this.buttons) {
+                            var butt = this.buttons[btn];
+                            if (butt.name == 'submit') butt.enable();
+                        }
                        if (action && action.result && action.result.success) {
                            this.submitSuccess();
                        }
@@ -90,6 +94,7 @@
                             this.submitError(action && action.result && action.result.msg || 'erreur');
                             
                        }
+                       
                 }
                 ,invalid:function() {
                 //    console.log('invalid: ', this.getForm().getValues());
@@ -108,6 +113,11 @@
                 ,submitForm:function() {
                     //console.log('submitForm');
                     if (this.getForm().isValid()) {
+                        for (btn in this.buttons) {
+                            if (this.buttons[btn].name == 'submit') {
+                                this.buttons[btn].disable();
+                                }
+                        }
                         this.getForm().submit({scope:this, success:this.validResponse,failure:this.validResponse});
                     } else {
                         // console.log('invalid form!');
