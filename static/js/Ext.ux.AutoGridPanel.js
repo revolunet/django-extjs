@@ -111,15 +111,17 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
             //this.store.reader.jsonData.metaData.fields);         
             this.getView().syncFocusEl(0);
             
+              this.getView().hmenu.add(
+                    { id: "reset", text: "Réinitialiser les colonnes", cls: "xg-hmenu-reset-columns", handler:function(btn, event) {this.razColumModel();}, scope:this }
+                );
+            
         }
  
-        this.view.hmenu.add(
-            { id: "reset", text: "Réinitialiser les colonnes", cls: "xg-hmenu-reset-columns", handler:function(btn, event) {this.razColumModel();}, scope:this }
-        );
+      
     },
 
     onStoreLoad : function() {
-        //console.log('onStoreLoad 1');
+      //   console.log('onStoreLoad 1');
         var view = this.getView();
         if((true === view.forceFit) || (true === this.forceFit)) {
             view.fitColumns(); 

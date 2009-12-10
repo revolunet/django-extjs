@@ -93,7 +93,8 @@ def JsonError(error):
     
     
 def JSONserialise(obj, sep = '"'):
-    
+    import decimal
+    from django.db import models
     if type(obj)==type({}):
         return JSONserialise_dict(obj)
     elif type(obj)==type(True):
@@ -103,19 +104,22 @@ def JSONserialise(obj, sep = '"'):
         for item in obj:
             data.append(JSONserialise(item))
         return "[%s]" % ",".join(data)
-    elif type(obj) in [type(0), type(0.0), long]:
+    elif type(obj) in [type(0), type(0.0), long, decimal.Decimal]:
         return '%s' % obj
     elif type(obj) in [datetime.datetime , datetime.date]:
          return u'%s%s%s' % (sep, obj, sep)
-    elif type(obj) in [type(''), type(u'')]:
+         
+    elif type(obj) in [type(''), type(u'')] or isinstance(obj, models.Model):
+        #print obj, isinstance(obj, str), isinstance(obj, unicode)
         if obj == "False": 
            return "false"
         elif obj == "True":
             return "true"
         else:
             return u'%s%s%s' % (sep, JsonCleanstr(obj), sep)
-    else:
-        #print 'JSONserialise', obj, type(obj)
+    else:   
+        
+        print 'JSONserialise unknown type', obj, type(obj), obj.__class__.__name__, isinstance(obj, models.Model)
         return u'%s' % obj
     return None
     

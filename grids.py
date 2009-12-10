@@ -89,8 +89,89 @@ class ModelGrid(object):
             self.fields.append(fdict)
         #for field in self.model:
         #    print field
+    
+    def to_grid_extjs3(self, queryset, start = 0, limit = 0, totalcount = None, json_add = "", colModel = None):
+        if not totalcount: 
+            totalcount = queryset.count()      
         
+        base_fields = self.fields
+        if colModel and colModel.get('fields'):
+            base_fields = []
+            for f in colModel['fields']:    
+               # print f, base_fields
+                for cf in self.fields:
+                   # print cf
+                    if cf['name'] == f['name']:
+                        #print 'found colModel for field %s' % f['name']
+                        config_field = cf
+                        if f.get('width'):
+                            config_field['width'] = f.get('width')
+                        if f.get('hidden'):                        
+                            config_field['hidden'] = f.get('hidden')
+                        base_fields.append(config_field)
+        
+        id_field = base_fields[0]['name']
+        list_fields = ','.join(['"%s"' % f['name'] for f in base_fields])
+        
+        json =  """{
+            "success":true
+            %s
+            ,"metaData":{
+                "root":"rows",
+                "totalProperty":"totalCount",
+                "successProperty": "success",
+                "idProperty":"%s",
+                "fields":[%s],
+                "sortInfo":{
+                   "field": "id",
+                   "direction": "DESC"
+                }
+             },\n""" % (json_add, id_field, list_fields)
+        
+        
+        json += '"columns":%s,' % utils.JSONserialise(base_fields)
+        
+        #print 'queryset', queryset
+        if queryset:
+            if limit > 0:
+                #print start, limit
+                queryset = queryset[int(start):int(start) + int(limit)]
+            json += """"rows":\n"""
+            json += '['
+            fields_items = []
+            for item in queryset:
+                #print 'item', item
+                idx = 0
+                field_items = []
+                for field in base_fields:
+                    val = getattr(item, field['name'], '')
+                   # print field, val
+                    if val:
+                        if field.get('type', '') == 'date':
+                            val = val.strftime(utils.DateFormatConverter(to_python = field['dateFormat'] ) )
+                        #else:
+                         #   val = utils.JsonCleanstr(val)
+                    else:
+                        if field.get('type', '') == 'float':
+                            val = 0.0
+                        elif field.get('type', '') == 'int':
+                            val = 0
+                        else:
+                            val = ''
+                    astr = utils.JSONserialise_dict_item(field['name'], val)
+                    field_items.append(astr)
+                    idx += 1
+                fields_items.append('{%s}' % ','.join(field_items))
+            json += ','.join(fields_items)
+            json += ']\n'
+        else:
+            json += '"rows":[]'
+        json += """\n,"totalCount":%s""" % totalcount
+        json += "}\n"
+        return json 
     def to_grid(self, queryset, start = 0, limit = 0, totalcount = None, json_add = "", colModel = None):
+        return self.to_grid_extjs2(queryset, start = start, limit =limit, totalcount = totalcount, json_add =json_add, colModel = colModel)
+    def to_grid_extjs2(self, queryset, start = 0, limit = 0, totalcount = None, json_add = "", colModel = None):
         if not totalcount: 
             totalcount = queryset.count()
             #print 'totalcount', totalcount

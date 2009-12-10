@@ -38,9 +38,11 @@
                             }
                          }
                          else {
+                            
                             Ext.apply(this, this.default_config);
+                            //Ext.apply(this, this.initial_config);
                          }
-                     
+                        Ext.apply(this, this.initial_config);
                          Ext.ux.DjangoForm.superclass.initComponent.apply(this, arguments);
                          
                          this.callback.createDelegate(this.scope, [this])();
