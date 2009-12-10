@@ -92,7 +92,7 @@ def JsonError(error):
     return JsonResponse('{"success":false, "msg":"%s"}' % JsonCleanstr(error))
     
     
-def JSONserialise(obj, sep = '"'):
+def JSONserialise(obj, sep = '"', escapeStrings = True):
     import decimal
     from django.db import models
     if type(obj)==type({}):
@@ -100,10 +100,13 @@ def JSONserialise(obj, sep = '"'):
     elif type(obj)==type(True):
         return obj and "true" or "false"
     elif type(obj)==type([]):
-        data = []
-        for item in obj:
-            data.append(JSONserialise(item))
-        return "[%s]" % ",".join(data)
+        # if len(obj) > 50:
+            # print '*********', 'list', len(obj), type(obj)
+        return "[%s]" % ','.join(map(JSONserialise, obj))
+        # data = []
+        # for item in obj:
+            # data.append(JSONserialise(item))
+        # return "[%s]" % ",".join(data)
     elif type(obj) in [type(0), type(0.0), long, decimal.Decimal]:
         return '%s' % obj
     elif type(obj) in [datetime.datetime , datetime.date]:
@@ -116,7 +119,10 @@ def JSONserialise(obj, sep = '"'):
         elif obj == "True":
             return "true"
         else:
-            return u'%s%s%s' % (sep, JsonCleanstr(obj), sep)
+            if escapeStrings:
+                return u'%s%s%s' % (sep, JsonCleanstr(obj), sep)
+            else:
+                return u'%s%s%s' % (sep, obj, sep)
     else:   
         
         print 'JSONserialise unknown type', obj, type(obj), obj.__class__.__name__, isinstance(obj, models.Model)
@@ -128,8 +134,11 @@ def JSONserialise_dict_item(key, value, sep = '"'):
     
     if key in ['renderer', 'editor', 'hidden', 'sortable', 'sortInfo', 'listeners', 'view', 'failure', 'success','scope', 'fn','store','handler']:
         if u'%s' % value in ['True', 'False']:
-             value = str(value).lower()
-        return '"%s":%s' % (key, JSONserialise(value, sep=''))
+            value = str(value).lower()
+        else:
+            # doint escape strings inside these special values (eg; store data)
+            value = JSONserialise(value, sep='', escapeStrings = False)
+        return '"%s":%s' % (key, value)
     else:
         value = JSONserialise(value, sep)
         return '"%s":%s' % (key, value)
