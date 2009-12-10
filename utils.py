@@ -129,7 +129,7 @@ def JSONserialise_dict_item(key, value, sep = '"'):
     if key in ['renderer', 'editor', 'hidden', 'sortable', 'sortInfo', 'listeners', 'view', 'failure', 'success','scope', 'fn','store','handler']:
         if u'%s' % value in ['True', 'False']:
              value = str(value).lower()
-        return '"%s":%s' % (key, JSONserialise(value))
+        return '"%s":%s' % (key, JSONserialise(value, sep=''))
     else:
         value = JSONserialise(value, sep)
         return '"%s":%s' % (key, value)
