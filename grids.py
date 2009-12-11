@@ -5,7 +5,7 @@ import utils
 
 
 class SimpleGrid(object):
-    def to_grid(self, fields, rows, totalcount = None, json_add = ""):
+    def to_grid(self, fields, rows, totalcount = None, json_add = "", sort_field = 'id', sort_direction = 'DESC'):
         if not totalcount: 
             totalcount = len(rows)
             #print 'totalcount', totalcount
@@ -17,10 +17,10 @@ class SimpleGrid(object):
                 "totalProperty":"totalCount",
                "successProperty": "success",
                 "sortInfo":{
-                   "field": "commercial",
-                   "direction": "DESC"
+                   "field": "%s",
+                   "direction": "%s"
                 },
-                "fields":""" % json_add
+                "fields":""" % (json_add, sort_field, sort_direction)
         json += utils.JSONserialise(fields)
         json += '}\n,"rows":\n'
         json += utils.JSONserialise(rows)
@@ -122,10 +122,7 @@ class ModelGrid(object):
                 "successProperty": "success",
                 "idProperty":"%s",
                 "fields":[%s],
-                "sortInfo":{
-                   "field": "id",
-                   "direction": "DESC"
-                }
+               
              },\n""" % (json_add, id_field, list_fields)
         
         
@@ -169,9 +166,9 @@ class ModelGrid(object):
         json += """\n,"totalCount":%s""" % totalcount
         json += "}\n"
         return json 
-    def to_grid(self, queryset, start = 0, limit = 0, totalcount = None, json_add = "", colModel = None):
-        return self.to_grid_extjs2(queryset, start = start, limit =limit, totalcount = totalcount, json_add =json_add, colModel = colModel)
-    def to_grid_extjs2(self, queryset, start = 0, limit = 0, totalcount = None, json_add = "", colModel = None):
+    def to_grid(self, queryset, start = 0, limit = 0, totalcount = None, json_add = "", colModel = None, sort_field = 'id', sort_direction = 'DESC'):
+        return self.to_grid_extjs2(queryset, start = start, limit =limit, totalcount = totalcount, json_add =json_add, colModel = colModel, sort_field = sort_field, sort_direction = sort_direction)
+    def to_grid_extjs2(self, queryset, start = 0, limit = 0, totalcount = None, json_add = "", colModel = None, sort_field = 'id', sort_direction = 'DESC'):
         if not totalcount: 
             totalcount = queryset.count()
             #print 'totalcount', totalcount
@@ -183,10 +180,10 @@ class ModelGrid(object):
                 "totalProperty":"totalCount",
                "successProperty": "success",
                 "sortInfo":{
-                   "field": "id",
-                   "direction": "DESC"
+                   "field": "%s",
+                   "direction": "%s"
                 },
-                "fields":""" % json_add
+                "fields":""" % (json_add, sort_field, sort_direction)
         
         base_fields = self.fields
         if colModel and colModel.get('fields'):
