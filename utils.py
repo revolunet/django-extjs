@@ -95,6 +95,7 @@ def JsonError(error):
 def JSONserialise(obj, sep = '"', escapeStrings = True):
     import decimal
     from django.db import models
+    
     if type(obj)==type({}):
         return JSONserialise_dict(obj)
     elif type(obj)==type(True):
@@ -123,6 +124,8 @@ def JSONserialise(obj, sep = '"', escapeStrings = True):
                 return u'%s%s%s' % (sep, JsonCleanstr(obj), sep)
             else:
                 return u'%s%s%s' % (sep, obj, sep)
+    elif not obj:   
+        return u'%s%s%s' % (sep, obj, sep)
     else:   
         
         print 'JSONserialise unknown type', obj, type(obj), obj.__class__.__name__, isinstance(obj, models.Model)
