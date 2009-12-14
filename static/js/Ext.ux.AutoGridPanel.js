@@ -61,6 +61,7 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
         var lookup = {};
  //  alert('onMetaChange');
         if (this.plugin) {
+            console.log(this.plugin);
             config[config.length] = this.plugin;
         }
         
@@ -111,10 +112,12 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
             //this.store.reader.jsonData.metaData.fields);         
             this.getView().syncFocusEl(0);
             
-              this.getView().hmenu.add(
-                    { id: "reset", text: "Réinitialiser les colonnes", cls: "xg-hmenu-reset-columns", handler:function(btn, event) {this.razColumModel();}, scope:this }
-                );
-            
+              var reinit_btn = this.getView().hmenu.getComponent('reset_colModel');
+              if (!reinit_btn) {
+                  this.getView().hmenu.add(
+                        { id: "reset_colModel", text: "Réinitialiser les colonnes", cls: "xg-hmenu-reset-columns", handler:function(btn, event) {this.razColumModel();}, scope:this }
+                    );
+               }
         }
  
       
