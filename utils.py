@@ -125,7 +125,7 @@ def JSONserialise(obj, sep = '"', escapeStrings = True):
             else:
                 return u'%s%s%s' % (sep, obj, sep)
     elif not obj:   
-        return u'%s%s%s' % (sep, obj, sep)
+        return u'%s%s' % (sep, sep)
     else:   
         
         print 'JSONserialise unknown type', obj, type(obj), obj.__class__.__name__, isinstance(obj, models.Model)

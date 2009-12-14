@@ -189,16 +189,17 @@ class ModelGrid(object):
         if colModel and colModel.get('fields'):
             base_fields = []
             for f in colModel['fields']:    
-               # print f, base_fields
+               # print f
                 for cf in self.fields:
-                   # print cf
                     if cf['name'] == f['name']:
-                        #print 'found colModel for field %s' % f['name']
                         config_field = cf
                         if f.get('width'):
                             config_field['width'] = f.get('width')
-                        if f.get('hidden'):                        
-                            config_field['hidden'] = f.get('hidden')
+                        # force hidden=False if field present in given colModel
+                        if f.get('hidden') == True:                        
+                            config_field['hidden'] = True
+                        else:
+                            config_field['hidden'] = False
                         base_fields.append(config_field)
         json +=  utils.JSONserialise(base_fields)
         json += "},\n"
