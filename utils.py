@@ -89,7 +89,7 @@ def JsonSuccess(params = {}):
     return JsonResponse(JSONserialise(d))
    
 def JsonError(error = ''):
-    return JsonResponse('{"success":false, "msg":"%s"}' % JsonCleanstr(error))
+    return JsonResponse('{"success":false, "msg":%s}' % JSONserialise(error))
     
     
 def JSONserialise(obj, sep = '"', escapeStrings = True):
