@@ -88,7 +88,7 @@ def JsonSuccess(params = {}):
     d.update(params)
     return JsonResponse(JSONserialise(d))
    
-def JsonError(error):
+def JsonError(error = ''):
     return JsonResponse('{"success":false, "msg":"%s"}' % JsonCleanstr(error))
     
     
