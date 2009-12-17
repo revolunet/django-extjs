@@ -73,8 +73,8 @@ class ExtJsForm(object):
                 #print '************',field, ofield, ofield.__class__.__name__
                 extfield = None
                 defaultConfig = {}
-                defaultConfig['name'] = field
-                defaultConfig['fieldLabel'] = ofield.label or field
+                defaultConfig['name'] = u'%s' % field
+                defaultConfig['fieldLabel'] = u'%s' % (ofield.label or field)
                 defaultConfig['allowBlank'] = not(ofield.required)
                 
                 defaultConfig['value'] = ''
@@ -250,6 +250,7 @@ class ExtJsForm(object):
                     ext_fields.append(extfield)
                 # checkboxes
                 elif ofield.__class__.__name__ == 'BooleanField':
+                   # print 'BooleanField', u'%s' % ofield.label
                     extfield = defaultConfig.copy()
                     extfield['xtype'] = 'checkbox'
                     if getattr(self, 'instance', None) and getattr(self.instance, field, None):
