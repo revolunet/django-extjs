@@ -175,7 +175,7 @@ class ModelGrid(object):
         
         # override with custom data
         if json_add:
-            print 'json_add', json_add
+            #print 'json_add', json_add
             jsondict.update(json_add)
         
         return utils.JSONserialise(jsondict) 

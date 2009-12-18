@@ -1,5 +1,5 @@
-django-extjs-forms
-==================
+django-extjs
+============
 
 Django [Form][1] and [ModelForm][2] power in your [ExtJs][3] apps
 
