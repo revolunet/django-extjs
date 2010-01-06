@@ -139,7 +139,7 @@ def JSONserialise_dict_item(key, value, sep = '"'):
         if u'%s' % value in ['True', 'False']:
             value = str(value).lower()
         else:
-            # doint escape strings inside these special values (eg; store data)
+            # dont escape strings inside these special values (eg; store data)
             value = JSONserialise(value, sep='', escapeStrings = False)
         return '"%s":%s' % (key, value)
     else:
@@ -168,5 +168,5 @@ def JsonCleanstr(inval):
         print "ERROR nunicoding %s" % inval
         pass
     
-    return inval.replace('"','\\"').replace('\n','\\n')
+    return inval.replace('"','\\"').replace('\n','\\n').replace('\r','')
     #.replace('\r','-')
