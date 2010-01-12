@@ -74,7 +74,7 @@ Tested with ExtJs 3 and Django >= 1 Feedback needed  : <julien@bouquillon.com>
 **Todo :** 
 
   - Radio groups
-  - Fieldsets
+  - Fieldsets : using django  [formsets][6] and [model formsets][7]
   - New FK creation
 
   
@@ -83,4 +83,6 @@ Tested with ExtJs 3 and Django >= 1 Feedback needed  : <julien@bouquillon.com>
   [3]: http://www.extjs.com
   [4]: http://www.extjs.com/forum/showthread.php?t=22661
   [5]: http://github.com/julienb/django-extjs/commit/3fbad2437db07adef645cbf132659932533e1e95#diff-2
+  [6]: http://docs.djangoproject.com/en/dev/topics/forms/formsets/
+  [7]: http://docs.djangoproject.com/en/dev/topics/forms/modelforms/
  
