@@ -120,10 +120,11 @@ class ExtJsForm(object):
                     extfield['store'] = "new Ext.data.SimpleStore({fields: ['id','display'],  data : %s })" % ( utils.JSONserialise(choices))
                     extfield['valueField'] = 'id'
                     extfield['displayField'] = 'display'
+                    extfield['hiddenName'] = field
                     if ofield.__class__.__name__  in ['ModelChoiceField', 'TypedChoiceField'] : 
                         extfield['editable'] = False
                         extfield['forceSelection'] = True
-                        extfield['hiddenName'] = field
+                        
                     extfield['mode'] = 'local'
                     extfield['triggerAction'] = 'all'
                     from django.core.exceptions import ObjectDoesNotExist
