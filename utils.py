@@ -40,6 +40,25 @@ def get_pickle_cookie(request, key):
 def get_cookie(request, key):
     return request.COOKIES.get(key)
 
+def datetimeFromExtDateField(indatestr):
+
+    if indatestr.count("T")>0:
+        (date, time) = indatestr.split("T")
+        (an, mois, jour) = date.split('-')
+        (h, m, s) = time.split(':')
+        return datetime.datetime(int(an), int(mois), int(jour), int(h), int(m), int(s))
+    elif indatestr.count("/") == '2':
+        if indatestr.count(' ')>0:
+            (date, time) = indatestr.split(" ")
+            (jour, mois, an) = date.split('/')
+            (h, m, s) = time.split(':')
+            return datetime.datetime(int(an), int(mois), int(jour), int(h), int(m), int(s))
+        else:
+            (jour, mois, an) = date.split('/')
+            return datetime.date(int(an), int(mois), int(jour))
+    return None
+     
+    
 def DateFormatConverter(to_extjs = None, to_python = None):
     """ convert date formats between ext and python """
     f = {}

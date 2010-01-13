@@ -75,6 +75,8 @@ Tested with ExtJs 3 and Django >= 1 Feedback needed  : <julien@bouquillon.com>
 
   - Radio groups
   - Fieldsets : using django  [formsets][6] and [model formsets][7]
+  - Grids: gestion editors
+  - Grids: auto renderer + editor from choices
   - New FK creation
 
   
