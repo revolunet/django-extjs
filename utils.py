@@ -100,7 +100,7 @@ def JSONserialise(obj, sep = '"', escapeStrings = True):
         return JSONserialise_dict(obj)
     elif type(obj)==type(True):
         return obj and "true" or "false"
-    elif type(obj)==type([]):
+    elif type(obj) in [type([]), type((1,2))]:
         # if len(obj) > 50:
             # print '*********', 'list', len(obj), type(obj)
         return "[%s]" % ','.join(map(JSONserialise, obj))

@@ -40,12 +40,16 @@
                          else {
                             
                             Ext.apply(this, this.default_config);
+                         //   console.log(this);
+                            
                             //Ext.apply(this, this.initial_config);
                          }
                         Ext.apply(this, this.initial_config);
                          Ext.ux.DjangoForm.superclass.initComponent.apply(this, arguments);
                          
-                         this.callback.createDelegate(this.scope, [this])();
+                         if (this.callback) {
+                            this.callback.createDelegate(this.scope, [this])();
+                            }
                          
                          this.addEvents('submitSuccess', 'submitError');
                      }
