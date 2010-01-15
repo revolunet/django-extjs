@@ -186,6 +186,6 @@ def JsonCleanstr(inval):
     except:
         print "ERROR nunicoding %s" % inval
         pass
-    
-    return inval.replace('"','\\"').replace('\n','\\n').replace('\r','')
+    # todo : ugly. cant ge my quotes correct in the json... WTF
+    return inval.replace('"',"'").replace('\n','\\n').replace('\r','')
     #.replace('\r','-')
