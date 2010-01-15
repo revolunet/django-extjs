@@ -100,11 +100,14 @@ class ExtJsForm(object):
                 v = ofield.widget.attrs.get('size', None)
                 if v:
                     defaultConfig['width'] = v * CHAR_PIXEL_WIDTH
-                    
+                
+                blank_config = {
+                    'value':None
+                }
                     
                 # hidden
                 if ofield.widget.__class__.__name__ == 'HiddenInput':
-                    extfield = {}
+                    extfield = blank_config.copy()
                     extfield['xtype'] = 'hidden'
                     extfield['name'] = field
                     extfield['value'] = ofield.initial or ''
@@ -116,7 +119,7 @@ class ExtJsForm(object):
                 # foreignkeys or custom choices
                 elif ofield.__class__.__name__ in ['ModelChoiceField', 'TypedChoiceField'] or getattr(ofield, 'choices', None):
                     #extfield = defaultConfig.copy()
-                    extfield = {}
+                    extfield = blank_config.copy()
                     extfield['xtype'] = 'combo' 
                     extfield['blankText'] = field + ' :' 
                     choices= [[c[0], c[1]] for c in ofield.choices]
@@ -146,7 +149,7 @@ class ExtJsForm(object):
                 # number field
                 elif ofield.__class__.__name__ in ['DecimalField', 'FloatField', 'IntegerField', 'PositiveIntegerField', 'PositiveSmallIntegerField']:
                     #extfield = defaultConfig.copy()
-                    extfield = {}
+                    extfield = blank_config.copy()
                     extfield['xtype'] = 'numberfield'
                     if getattr(self, 'instance', None) and getattr(self.instance, field):
                         extfield['value'] = getattr(self.instance, field)
@@ -165,7 +168,7 @@ class ExtJsForm(object):
                 # textfield
                 elif ofield.__class__.__name__ == 'CharField':
                     #extfield = defaultConfig.copy()
-                    extfield = {}
+                    extfield = blank_config.copy()
                     extfield['xtype'] = 'textfield'
                     if  isinstance(ofield.widget, forms.widgets.PasswordInput):
                             extfield['inputType'] = 'password'
@@ -191,7 +194,7 @@ class ExtJsForm(object):
                     ext_fields.append(extfield)
                 elif ofield.__class__.__name__ == 'DateField':
                     #extfield = defaultConfig.copy()
-                    extfield = {}
+                    extfield = blank_config.copy()
                     extfield['xtype'] = 'datefield'
                     extfield['format'] = utils.DateFormatConverter(to_extjs = ofield.input_formats[0])
                     if getattr(self, 'instance', None) and getattr(self.instance, field, None):
@@ -200,7 +203,7 @@ class ExtJsForm(object):
                     ext_fields.append(extfield)
                 elif ofield.__class__.__name__ == 'URLField':
                     #extfield = defaultConfig.copy()
-                    extfield = {}
+                    extfield = blank_config.copy()
                     extfield['xtype'] = 'textfield'
                     extfield['vtype'] = 'url'
                     if getattr(self, 'instance', None) and getattr(self.instance, field, None):
@@ -209,7 +212,7 @@ class ExtJsForm(object):
                     ext_fields.append(extfield)
                 elif ofield.__class__.__name__ == 'TimeField':
                     #extfield = defaultConfig.copy()
-                    extfield = {}
+                    extfield = blank_config.copy()
                     extfield['xtype'] = 'timefield'
                     extfield['increment'] = 30
                     extfield['format'] = utils.DateFormatConverter(to_extjs = ofield.input_formats[0])
@@ -225,7 +228,7 @@ class ExtJsForm(object):
                 # datetime : use sakis xdatetime ext.ux
                 elif ofield.__class__.__name__ == 'DateTimeField':
                     #extfield = defaultConfig.copy()
-                    extfield = {}
+                    extfield = blank_config.copy()
                     extfield['xtype'] = 'xdatetime'
                   #  print 'xdatetime', ofield.initial, extfield['value'] 
                     # todo : ugly !!
@@ -260,7 +263,7 @@ class ExtJsForm(object):
                 # email
                 elif ofield.__class__.__name__ == 'EmailField':
                     #extfield = defaultConfig.copy()
-                    extfield = {}
+                    extfield = blank_config.copy()
                     extfield['xtype'] = 'textfield'
                     extfield['vtype'] = 'email'
                     if getattr(self, 'instance', None) and getattr(self.instance, field, None):
@@ -271,7 +274,7 @@ class ExtJsForm(object):
                 elif ofield.__class__.__name__ == 'BooleanField':
                    # print 'BooleanField', u'%s' % ofield.label
                     #extfield = defaultConfig.copy()
-                    extfield = {}
+                    extfield = blank_config.copy()
                     
                     extfield['xtype'] = 'checkbox'
                     if getattr(self, 'instance', None) and getattr(self.instance, field, None):

@@ -8,7 +8,7 @@
                 ,callback:null
                 ,scope:null
                 
-               
+                ,border:false
                 ,custom_config:null
                 ,default_config:null
                 ,showButtons:true
@@ -22,61 +22,58 @@
                         ]
                         }
                         
-                        this.items = {'html':'chargement...'}
+                        this.items = {border:false, 'html':'<img style="vertical-align:middle" src="/core/static/js/ext-3.1.0/resources/images/default/shared/large-loading.gif"/>&nbsp;&nbsp;&nbsp;&nbsp;loading...'}
                     this.getDefaultButton = function(name) {
                     
                     }
                     this.gotFormCallback = function(response, options) {
-                        // console.log('gotFormCallback');
+                        
                          var res = Ext.decode(response.responseText);
-                        // console.log(res);
-                         // this.default_config = res;
-                          // if (this.custom_config) {
-                            // Ext.apply(this, this.custom_config);
-                            // }
-                            // apply custom config
-                            // Ext.apply(this, this.custom_config());
-                            // add hidden fields
+                         this.default_config = res;
+
                             this.removeAll();
-                            if (this.intro) {
-                                this.add({html:this.intro, style:'padding:10px;font-size:14px', border:false});
+   
+                             if (this.custom_config) {
+                                // add custom form config to this formpanel
+                                var newconf = this.custom_config.createDelegate(this, [this])();
+                                for (var i=0;i<newconf.items.length;i++) {
+                                    this.add(Ext.ComponentMgr.create(newconf.items[i]));
+                                }
+                                
+                                // auto add hidden fields from django form if needed
+                                    for (var i=0;i<this.default_config.length;i++) {
+                                        if (this.default_config[i].xtype == 'hidden') {
+                                           this.add(Ext.ComponentMgr.create(this.default_config[i]));
+                                        }
+                                    }
+                                        //this.default_config = res;
                             }
-                            for (var i=0;i<res.length;i++) {
-                                this.add(Ext.ComponentMgr.create(res[i]));
-                             //   console.log('push', res[i]);
-                                //if (res.items[i].xtype == 'hidden') {
-                                   
-                               //    console.log('add hidden field', this.default_config.items[i]);
-                                  //  }
+                            else {
+                                
+                                if (this.intro) {
+                                    this.add({html:this.intro, style:'padding-bottom:10px;padding-top:10px;font-size:14px', border:false});
+                                }
+                                if (this.startItems) {
+                                    this.add(this.startItems);
+                                }
+                                
+                              //  Ext.apply(this, this.default_config);
+                                 
+                                for (var i=0;i<res.length;i++) {
+                                    this.add(Ext.ComponentMgr.create(res[i]));
+                                }
                             }
-                            this.doLayout();    
-                         // }
-                         // else {
-                            
-                            // Ext.apply(this, this.default_config);
-                         //   console.log(this);
-                            
-                            //Ext.apply(this, this.initial_config);
-                         // }
-                        // Ext.apply(this, this.initial_config);
-                        
-                       //  Ext.ux.DjangoForm.superclass.initComponent.apply(this, arguments);
-                         
-                  
-                         
-                         if (this.callback) {
-                            this.callback.createDelegate(this.scope, [this])();
+                            //finally callback your function when ready
+                           if (this.callback) {
+                              this.callback.createDelegate(this.scope, [this])();
                             }
-                        
                      }
+                     
                      var o = {}
                      if (this.baseParamsLoad) Ext.apply(o, this.baseParamsLoad);
-                //     console.log(o);
-                
-                //console.log('superclass 1');
-             Ext.ux.DjangoForm.superclass.initComponent.apply(this, arguments);
-               // console.log('superclass 2');
-                 
+
+                        Ext.ux.DjangoForm.superclass.initComponent.apply(this, arguments);
+                         
                          this.addEvents('submitSuccess', 'submitError');
                          
                      Ext.Ajax.request({
@@ -166,8 +163,9 @@
  
              
         Ext.ux.DjangoField = function(config) {
-               // console.log(config);
-                var items = config.django_form.default_config.items;
+            //  console.log(config);
+          //         console.log(this);
+                var items = config.django_form.default_config;
                 
                 for (var i=0;i<items.length;i++) {
                     if (items[i].name == config.name) {
