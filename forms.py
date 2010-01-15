@@ -65,6 +65,7 @@ class ExtJsForm(object):
                 #for lfield in self.instance._meta.fields: 
                     #print 'FIELD INSTANCE :', lfield
                     #print dir(lfield)
+            print 'self.fields', self.fields
             for field in self.fields:
                 if field in excludes: continue
                 ofield = self.fields[field]
@@ -109,11 +110,13 @@ class ExtJsForm(object):
                     extfield['value'] = ofield.initial or ''
                     if getattr(self, 'instance', None) and getattr(self.instance, field):
                         extfield['value'] = getattr(self.instance, field)
-                    ext_fields.append(extfield)
-                
+                    extfield.update(defaultConfig)
+                    ext_fields.append(extfield)                
+                    
                 # foreignkeys or custom choices
                 elif ofield.__class__.__name__ in ['ModelChoiceField', 'TypedChoiceField'] or getattr(ofield, 'choices', None):
-                    extfield = defaultConfig.copy()
+                    #extfield = defaultConfig.copy()
+                    extfield = {}
                     extfield['xtype'] = 'combo' 
                     extfield['blankText'] = field + ' :' 
                     choices= [[c[0], c[1]] for c in ofield.choices]
@@ -137,13 +140,13 @@ class ExtJsForm(object):
                     except ObjectDoesNotExist:
                            extfield['value'] = ''
                                 
-    
+                    extfield.update(defaultConfig)
                     ext_fields.append(extfield)
                     
                 # number field
                 elif ofield.__class__.__name__ in ['DecimalField', 'FloatField', 'IntegerField', 'PositiveIntegerField', 'PositiveSmallIntegerField']:
-                    extfield = defaultConfig.copy()
-                    
+                    #extfield = defaultConfig.copy()
+                    extfield = {}
                     extfield['xtype'] = 'numberfield'
                     if getattr(self, 'instance', None) and getattr(self.instance, field):
                         extfield['value'] = getattr(self.instance, field)
@@ -157,10 +160,12 @@ class ExtJsForm(object):
                         extfield['allowDecimals'] = True
                         extfield['decimalPrecision'] = 2
                         extfield['decimalSeparator'] = '.'                   
+                    extfield.update(defaultConfig)
                     ext_fields.append(extfield)
                 # textfield
                 elif ofield.__class__.__name__ == 'CharField':
-                    extfield = defaultConfig.copy()
+                    #extfield = defaultConfig.copy()
+                    extfield = {}
                     extfield['xtype'] = 'textfield'
                     if  isinstance(ofield.widget, forms.widgets.PasswordInput):
                             extfield['inputType'] = 'password'
@@ -180,23 +185,31 @@ class ExtJsForm(object):
                         extfield['maxLength'] = ofield.max_length
                     if getattr(self, 'instance', None) and getattr(self.instance, field, None):
                         extfield['value'] = getattr(self.instance, field)
+                    # if getattr(self, 
+                        # extfield
+                    extfield.update(defaultConfig)
                     ext_fields.append(extfield)
                 elif ofield.__class__.__name__ == 'DateField':
-                    extfield = defaultConfig.copy()
+                    #extfield = defaultConfig.copy()
+                    extfield = {}
                     extfield['xtype'] = 'datefield'
                     extfield['format'] = utils.DateFormatConverter(to_extjs = ofield.input_formats[0])
                     if getattr(self, 'instance', None) and getattr(self.instance, field, None):
                         dval = getattr(self.instance, field)
+                    extfield.update(defaultConfig)
                     ext_fields.append(extfield)
                 elif ofield.__class__.__name__ == 'URLField':
-                    extfield = defaultConfig.copy()
+                    #extfield = defaultConfig.copy()
+                    extfield = {}
                     extfield['xtype'] = 'textfield'
                     extfield['vtype'] = 'url'
                     if getattr(self, 'instance', None) and getattr(self.instance, field, None):
                         extfield['value'] = getattr(self.instance, field)
+                    extfield.update(defaultConfig)
                     ext_fields.append(extfield)
                 elif ofield.__class__.__name__ == 'TimeField':
-                    extfield = defaultConfig.copy()
+                    #extfield = defaultConfig.copy()
+                    extfield = {}
                     extfield['xtype'] = 'timefield'
                     extfield['increment'] = 30
                     extfield['format'] = utils.DateFormatConverter(to_extjs = ofield.input_formats[0])
@@ -207,10 +220,12 @@ class ExtJsForm(object):
                         except ValueError:
                             #extfield['value'] = None
                             pass
+                    extfield.update(defaultConfig)
                     ext_fields.append(extfield)
                 # datetime : use sakis xdatetime ext.ux
                 elif ofield.__class__.__name__ == 'DateTimeField':
-                    extfield = defaultConfig.copy()
+                    #extfield = defaultConfig.copy()
+                    extfield = {}
                     extfield['xtype'] = 'xdatetime'
                   #  print 'xdatetime', ofield.initial, extfield['value'] 
                     # todo : ugly !!
@@ -240,25 +255,31 @@ class ExtJsForm(object):
                             extfield['value'] = ''
                             extfield['dateConfig'] = {'value':''}
                             extfield['timeConfig'] = {'value':''}
+                    extfield.update(defaultConfig)
                     ext_fields.append(extfield)                
                 # email
                 elif ofield.__class__.__name__ == 'EmailField':
-                    extfield = defaultConfig.copy()
+                    #extfield = defaultConfig.copy()
+                    extfield = {}
                     extfield['xtype'] = 'textfield'
                     extfield['vtype'] = 'email'
                     if getattr(self, 'instance', None) and getattr(self.instance, field, None):
                         extfield['value'] = getattr(self.instance, field)
+                    extfield.update(defaultConfig)
                     ext_fields.append(extfield)
                 # checkboxes
                 elif ofield.__class__.__name__ == 'BooleanField':
                    # print 'BooleanField', u'%s' % ofield.label
-                    extfield = defaultConfig.copy()
+                    #extfield = defaultConfig.copy()
+                    extfield = {}
+                    
                     extfield['xtype'] = 'checkbox'
                     if getattr(self, 'instance', None) and getattr(self.instance, field, None):
                         extfield['value'] = getattr(self.instance, field)
                         extfield['checked'] = getattr(self.instance, field)
                     else:
                         extfield['checked'] = ofield.initial
+                    extfield.update(defaultConfig)
                     ext_fields.append(extfield)
-
+         
             return ext_fields

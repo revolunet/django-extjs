@@ -154,7 +154,7 @@ def JSONserialise(obj, sep = '"', escapeStrings = True):
 def JSONserialise_dict_item(key, value, sep = '"'):
     # quote the value except for ExtJs keywords
     
-    if key in ['renderer', 'editor', 'hidden', 'sortable', 'sortInfo', 'listeners', 'view', 'failure', 'success','scope', 'fn','store','handler']:
+    if key in ['renderer', 'editor', 'hidden', 'sortable', 'sortInfo', 'listeners', 'view', 'failure', 'success','scope', 'fn','store','handler','callback']:
         if u'%s' % value in ['True', 'False']:
             value = str(value).lower()
         else:

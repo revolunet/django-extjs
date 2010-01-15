@@ -7,6 +7,8 @@
                 ,baseParamsLoad:null
                 ,callback:null
                 ,scope:null
+                
+               
                 ,custom_config:null
                 ,default_config:null
                 ,showButtons:true
@@ -19,43 +21,64 @@
                             ,{name:'reset', xtype:'button', iconCls:'icon-cancel', text:'reset',  scope:this, handler:function(args) {this.resetForm();}}
                         ]
                         }
+                        
+                        this.items = {'html':'chargement...'}
                     this.getDefaultButton = function(name) {
                     
                     }
                     this.gotFormCallback = function(response, options) {
+                        // console.log('gotFormCallback');
                          var res = Ext.decode(response.responseText);
-                         
-                         this.default_config = res;
-                         if (this.custom_config) {
+                        // console.log(res);
+                         // this.default_config = res;
+                          // if (this.custom_config) {
+                            // Ext.apply(this, this.custom_config);
+                            // }
                             // apply custom config
-                            Ext.apply(this, this.custom_config());
+                            // Ext.apply(this, this.custom_config());
                             // add hidden fields
-                            for (var i=0;i<this.default_config.items.length;i++) {
-                                if (this.default_config.items[i].xtype == 'hidden') {
-                                   this.items.push(Ext.ComponentMgr.create(this.default_config.items[i]));
-                               //    console.log('add hidden field', this.default_config.items[i]);
-                                    }
+                            this.removeAll();
+                            if (this.intro) {
+                                this.add({html:this.intro, style:'padding:10px;font-size:14px', border:false});
                             }
-                         }
-                         else {
+                            for (var i=0;i<res.length;i++) {
+                                this.add(Ext.ComponentMgr.create(res[i]));
+                             //   console.log('push', res[i]);
+                                //if (res.items[i].xtype == 'hidden') {
+                                   
+                               //    console.log('add hidden field', this.default_config.items[i]);
+                                  //  }
+                            }
+                            this.doLayout();    
+                         // }
+                         // else {
                             
-                            Ext.apply(this, this.default_config);
+                            // Ext.apply(this, this.default_config);
                          //   console.log(this);
                             
                             //Ext.apply(this, this.initial_config);
-                         }
-                        Ext.apply(this, this.initial_config);
-                         Ext.ux.DjangoForm.superclass.initComponent.apply(this, arguments);
+                         // }
+                        // Ext.apply(this, this.initial_config);
+                        
+                       //  Ext.ux.DjangoForm.superclass.initComponent.apply(this, arguments);
+                         
+                  
                          
                          if (this.callback) {
                             this.callback.createDelegate(this.scope, [this])();
                             }
-                         
-                         this.addEvents('submitSuccess', 'submitError');
+                        
                      }
                      var o = {}
                      if (this.baseParamsLoad) Ext.apply(o, this.baseParamsLoad);
                 //     console.log(o);
+                
+                //console.log('superclass 1');
+             Ext.ux.DjangoForm.superclass.initComponent.apply(this, arguments);
+               // console.log('superclass 2');
+                 
+                         this.addEvents('submitSuccess', 'submitError');
+                         
                      Ext.Ajax.request({
                         url:this.url
                         ,params:o
@@ -64,6 +87,8 @@
                         ,success:this.gotFormCallback
                         ,failure:this.gotFormCallback
                     });
+                    
+                    
                    
                 }
               ,submitSuccess:function() {
