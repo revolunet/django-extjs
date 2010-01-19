@@ -168,15 +168,7 @@ def JSONserialise_dict_item(key, value, sep = '"'):
 def JSONserialise_dict(inDict):
     data=[]
     for key in inDict.keys():
-        # skip quotes for ExtJs reserved names  
         data.append(JSONserialise_dict_item(key, inDict[key]))
-        #if key in ['store', 'listeners', 'fn', 'handler', 'failure', 'success', 'scope']:
-        #    val = inDict[key]
-        #    if u'%s' % val in ['True', 'False']:
-        #        val = str(val).lower()
-        #else:
-        #    val = JSONserialise(inDict[key])
-        #data.append('%s:%s' % (key,val))
     data = ",".join(data)
     return "{%s}" % data
     
@@ -186,6 +178,6 @@ def JsonCleanstr(inval):
     except:
         print "ERROR nunicoding %s" % inval
         pass
-    # todo : ugly. cant ge my quotes correct in the json... WTF
-    return inval.replace('"',"'").replace('\n','\\n').replace('\r','')
-    #.replace('\r','-')
+    inval = inval.replace('"',r'\"')
+    inval = inval.replace('\n','\\n').replace('\r','')
+    return inval
