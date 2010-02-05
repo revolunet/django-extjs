@@ -1,7 +1,7 @@
 django-extjs
 ============
 
-Django [Form][1] and [ModelForm][2] power for your [ExtJs][3] apps
+Django [Form][1] and [ModelForm][2] power for your [ExtJs][3] apps.
 
 Convert your forms.Form and forms.ModelForm to extjs and handles the form submission like any django form.
 
@@ -9,37 +9,104 @@ Generate custom ExtJs dynamic grids from django models.
 
 Tested with ExtJs 3 and Django >= 1 Feedback needed  : <julien@bouquillon.com>
 
-(used to work with ExtJs 1.2  (this [commit][5] may have broken this, not tested)
+There is a full working demo project based on my django-skeleton here : [ExtJs django-skeleton branch][8]
 
+**Grid example :**
 
-**Usage :**
+    # the django view
+    def users_grid(request):
+        # return Json autogrid configuration
+        grid = grids.ModelGrid(User)            # generic grid from model fields (can be customised)
+        users = User.objects.all()              # use any queryset
+        json = grid.to_grid(users, limit = 25)    
+        return utils.JsonResponse(json)
 
-  - Clone the Git repo and create a django_extjs app in your django project
-  - eg: git submodule add  -- "git://github.com/julienb/django-extjs.git"  "apps/django_extjs"
-  - Put static folder somewhere on your statics
-  - Create an example view from views.py
-  - Edit static/example.html to match your view and static paths
-  - Open your form from ExtJs:
-  
-        // simplest example of a django generated Form (EmailFormExample)
-        // its ajax loaded then displayed in a new window
-        function openForm() {
-         // we first declare a window where the form will appear
-          var window_form = new Ext.Window({
-                title:'simple django Form'
-                ,autoWidth:true
-                ,autoScroll:true
-                ,autoHeight:true
-            });
-          // then we ask our form to load and display the window when done
-          var django_form = new Ext.ux.DjangoForm({url:'/apps/django_extjs/example_email', callback:function(form) {window_form.add(form);window_form.show();}});
-          // we want to auto close the window on form submit success
-          django_form.on('submitSuccess', function() {
-                    window_form.close();
-                });
-        }
-             
-  
+    # the javascript (ExtJs 3) :
+    var users_grid = new Ext.ux.AutoGrid({
+        autoWidth:true
+        ,showBbar:true
+        ,loadMask:true
+        ,sm:new Ext.grid.RowSelectionModel({})
+        ,store:new Ext.data.JsonStore({
+            autoLoad:true
+            ,remoteSort:true
+            ,proxy:new Ext.data.HttpProxy({
+                url:'apps/main/users_grid'
+                ,method:'POST'
+            })
+            ,reader: new Ext.data.JsonReader({
+                root:'rows'
+                ,id:'id'
+            })
+        })
+    });
+
+    var w = new Ext.Window({
+        title:'autogrid !'
+        ,items:users_grid
+    }).show();
+    
+**Form example :**
+
+    # the django view
+
+    # the form definition (could also be a ModelForm)
+    class ContactForm(forms.Form):
+        name = forms.CharField(label='your name')
+        phone = forms.CharField(label='phone number', required = False)
+        mobile_type = forms.CharField(label='phone type', required = True)
+        mobile_type.choices = [
+             ('ANDROID','Android')
+            ,('IPHONE','iPhone')
+            ,('SYMBIAN','Symbian (nokia)')
+            ,('OTHERS','Others')
+        ]
+        email = forms.EmailField(label='your email', initial='test@revolunet.com')
+        message = forms.CharField(label='your message', widget = forms.widgets.Textarea(attrs={'cols':15, 'rows':5}))
+
+    ExtJsForm.addto(ContactForm)        # new methods added to the form
+            
+    # the form view
+    def contact_form(request, path = None):
+        if request.method == 'POST':
+            # handle form submission
+            form = ContactForm(request.POST)
+            if not form.is_valid():
+                return utils.JsonError(form.html_errorlist())
+            else:
+                # send your email
+                print 'send a mail'
+            return utils.JsonResponse(utils.JSONserialise({
+                'success':True, 
+                'messages': [{'icon':'/core/static/img/famfamfam/accept.png', 'message':'Enregistrement OK'}]
+                }) )
+        else:
+            # handle form display
+            form = ContactForm()
+            return utils.JsonResponse(utils.JSONserialise(form.as_extjsfields()))
+            
+
+    # the javascript (ExtJs 3) :
+    var contact_win = new Ext.Window({
+        title:'django form example'
+        ,width:300
+        ,y:420
+        ,layout:'fit'
+        ,height:300
+        ,items:new Ext.ux.DjangoForm({
+                border:false
+                ,intro:'generated contact form'
+                ,showButtons:true
+                ,showSuccessMessage:'Form submission success'
+                ,url:'apps/main/contact_form' 
+                ,scope:this
+                 ,callback:function(form) {
+                    form.doLayout();
+                 }
+           })
+         ,draggable :true
+    }).show();
+    
 **The lib provides :**
 
   - Django code to render your forms as extjs
@@ -68,7 +135,6 @@ Tested with ExtJs 3 and Django >= 1 Feedback needed  : <julien@bouquillon.com>
 **Dependencies :**
 
   - The lib includes [Saki's Ext.ux.form.DateTime][4] ExtJs component (LGPL)
-  - Also includes Ext.ux.AutoGrid and Ext.ux.AutoGridPanel
   
   
 **Todo :** 
@@ -87,4 +153,5 @@ Tested with ExtJs 3 and Django >= 1 Feedback needed  : <julien@bouquillon.com>
   [5]: http://github.com/julienb/django-extjs/commit/3fbad2437db07adef645cbf132659932533e1e95#diff-2
   [6]: http://docs.djangoproject.com/en/dev/topics/forms/formsets/
   [7]: http://docs.djangoproject.com/en/dev/topics/forms/modelforms/
+  [8]: http://github.com/revolunet/django-skeleton/tree/extjs
  
