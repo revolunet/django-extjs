@@ -26,23 +26,18 @@ There is a full working demo project based on my django-skeleton here : [ExtJs d
         autoWidth:true
         ,showBbar:true
         ,loadMask:true
-        ,sm:new Ext.grid.RowSelectionModel({})
         ,store:new Ext.data.JsonStore({
-            autoLoad:true
+             autoLoad:true
             ,remoteSort:true
             ,proxy:new Ext.data.HttpProxy({
-                url:'apps/main/users_grid'
+                 url:'apps/main/users_grid'
                 ,method:'POST'
-            })
-            ,reader: new Ext.data.JsonReader({
-                root:'rows'
-                ,id:'id'
             })
         })
     });
 
     var w = new Ext.Window({
-        title:'autogrid !'
+         title:'autogrid !'
         ,items:users_grid
     }).show();
     
