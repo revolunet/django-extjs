@@ -65,7 +65,7 @@ class ExtJsForm(object):
                 #for lfield in self.instance._meta.fields: 
                     #print 'FIELD INSTANCE :', lfield
                     #print dir(lfield)
-            print 'self.fields', self.fields
+            #print 'self.fields', self.fields
             for field in self.fields:
                 if field in excludes: continue
                 ofield = self.fields[field]
@@ -277,7 +277,7 @@ class ExtJsForm(object):
                     extfield = blank_config.copy()
                     
                     extfield['xtype'] = 'checkbox'
-                    if getattr(self, 'instance', None) and getattr(self.instance, field, None):
+                    if getattr(self, 'instance', None) and getattr(self.instance, field, -1) != '-1':
                         extfield['value'] = getattr(self.instance, field)
                         extfield['checked'] = getattr(self.instance, field)
                     else:
