@@ -88,8 +88,14 @@ class ModelGrid(object):
         #    print field
    
 
-    def get_fields_json(self, colModel):        
+    def get_fields(self, colModel):  
+        """ return this grid field list
+            . can include hidden fields
+            . A given colModel can order the fields and override width/hidden properties
+        """
+        # standard fields
         fields = self.fields
+        # use the given colModel to order the fields
         if colModel and colModel.get('fields'):
             fields = []
             for f in colModel['fields']:    
@@ -107,6 +113,11 @@ class ModelGrid(object):
         return fields
                         
     def get_rows(self, fields, queryset, start, limit):
+        """ 
+            return the row list from given queryset 
+            order the data based on given field list
+            paging from start,limit
+        """
         rows = []
         if queryset:
             if limit > 0:
@@ -140,18 +151,19 @@ class ModelGrid(object):
         return rows
          
         
-    def to_grid(self, queryset, start = 0, limit = 0, totalcount = None, json_add = {}, colModel = None, sort_field = 'id', sort_direction = 'DESC', ext_version=2):
+    def to_grid(self, queryset, start = 0, limit = 0, totalcount = None, json_add = {}, colModel = None, sort_field = 'id', sort_direction = 'DESC'):
+        """ return the given queryset as an ExtJs grid config
+            includes full metadata (columns, renderers, totalcount...)
+            includes the rows data
+            to be used in combination with Ext.ux.AutoGrid 
+        """
         if not totalcount: 
             totalcount = queryset.count()
 
-        base_fields = self.get_fields_json(colModel)
+        base_fields = self.get_fields(colModel)
         
-        # todo : silly ?
+        # todo : stupid ?
         id_field = base_fields[0]['name']
-        
-        fields = base_fields
-        if ext_version == 3:
-            fields = [u'%s' % f['name'] for f in base_fields]
             
         jsondict = {
              'succes':True
@@ -164,18 +176,13 @@ class ModelGrid(object):
                    "field": sort_field
                    ,"direction": sort_direction
                 }
-                ,'fields':fields
+                ,'fields':base_fields
             }
             ,'rows':self.get_rows(base_fields, queryset, start, limit)
             ,'totalCount':totalcount
         }
         
-        if ext_version == 3:
-            jsondict['columns'] = base_fields 
-        
-        # override with custom data
         if json_add:
-            #print 'json_add', json_add
             jsondict.update(json_add)
         
         return utils.JSONserialise(jsondict) 
