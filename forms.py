@@ -8,9 +8,19 @@ CHAR_PIXEL_HEIGHT = 15
 
 import utils
 
+def getModelForm(modelref, exclude_list  = [], fields_list = []):
+    class FormFromModel(forms.ModelForm):
+        class Meta:
+            model = modelref
+            exclude = exclude_list 
+            fields = fields_list
+        def __init__(self, *args, **kwargs):
+            print args, kwargs
+            super(FormFromModel, self).__init__(*args, **kwargs)
+    return FormFromModel
 
 def getFieldConfig(field_name, django_field, value = None):
-    
+   # print 'getFieldConfig', field_name
     ofield = django_field
     form_field = django_field
     field_class_name = ofield.__class__.__name__ 

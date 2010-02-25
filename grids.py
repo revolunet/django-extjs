@@ -96,10 +96,15 @@ class ModelGrid(object):
             self.fields.append(fdict)
         #for field in self.model:
         #    print field
-   
+    
     def get_field(self, name):  
         for f in self.fields:
             if f.get('name') == name:
+                return f
+        return None
+    def get_base_field(self, name):  
+        for f in self.base_fields:
+            if f.name == name:
                 return f
         return None
     def get_fields(self, colModel):  
@@ -204,8 +209,9 @@ class ModelGrid(object):
         return utils.JSONserialise(jsondict) 
         
     class Meta:
-        pass
-
+        exclude = []
+        order = []
+        fields_conf = {}
 
 class EditableModelGrid(ModelGrid):
     def __init__(self, *args, **kwargs):
@@ -215,3 +221,41 @@ class EditableModelGrid(ModelGrid):
             field_conf = self.get_field(field.name)
             if not (getattr(self.Meta, 'fields_conf', {}).has_key(field.name) and self.Meta.fields_conf[field.name].has_key('editor')):
                 field_conf['editor'] = forms.getFieldConfig(field.name, field)
+                
+    def update_instances_from_json(self, json):
+        """ udpate this grid model instances from provided json
+            json example : update=[{"id":1, "data":{"username":"root2","first_name":"", "last_name":"bouqui", "is_staff":false, "is_superuser":true}}]
+            only modified data is sent from client
+        """
+        from django.utils import simplejson
+        items = simplejson.loads(json)
+        
+        forms_items = []
+        forms_valid = True
+        errors = []
+        for item_data in items:
+            # get instance for this line
+            # todo : dynamic pk
+            pk = item_data.get('id', None)
+            #print 'pk', pk, self.model.pk
+            instance = self.model()
+            
+            if pk:
+                instance = self.model.objects.get(pk = pk)
+         #   print instance    
+            form = forms.getModelForm(self.model, fields_list = item_data['data'].keys())
+            form = form(item_data['data'], instance = instance)
+            
+            forms_items.append(form)
+            
+            if not form.is_valid():
+                errors.append(form.errors)
+                
+        if not errors:
+            for form in forms_items:
+                form.save()
+            return True
+        else:
+            # todo : detailed errors
+            raise Exception(errors)
+                
