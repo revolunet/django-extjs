@@ -9,6 +9,175 @@ CHAR_PIXEL_HEIGHT = 15
 import utils
 
 
+def getFieldConfig(field_name, django_field, value = None):
+    
+    ofield = django_field
+    form_field = django_field
+    field_class_name = ofield.__class__.__name__ 
+    if not isinstance(ofield, forms.Field):
+        form_field = ofield.formfield()
+        
+    config = {}
+    
+    if value:
+        config['value'] = value
+    elif hasattr(ofield, 'initial'):
+        config['value'] = ofield.initial
+
+    
+    config['name'] = u'%s' % field_name
+    config['fieldLabel'] = u'%s' % (form_field and form_field.label or field_name)
+    if form_field:
+        config['allowBlank'] = not(form_field.required)
+        config['required'] = form_field.required
+    
+    e = getattr(ofield, 'widget', None)
+    if e:
+        s = ofield.widget.attrs.get('style', None)
+        if s:
+            config['style'] = s
+                 
+        # width based on django widget 'size' attr
+        v = ofield.widget.attrs.get('size', None)
+        if v:
+            config['width'] = v * CHAR_PIXEL_WIDTH
+            
+    
+        
+    #print field_name, field_class_name
+    
+    if field_class_name == 'HiddenInput':
+        config['xtype'] = 'hidden'
+        config['name'] = field_name
+    
+    # foreignkeys or custom choices
+    elif field_class_name in ['ModelChoiceField', 'TypedChoiceField'] or getattr(ofield, 'choices', None):
+        config['xtype'] = 'combo' 
+        config['blankText'] = field_name + ' :' 
+        choices= [[c[0], c[1]] for c in ofield.choices]
+        config['store'] = "new Ext.data.SimpleStore({fields: ['id','display'],  data : %s })" % ( utils.JSONserialise(choices))
+        config['valueField'] = 'id'
+        config['displayField'] = 'display'
+        config['hiddenName'] = field_name
+        if field_class_name in ['ModelChoiceField', 'TypedChoiceField'] : 
+            # disable foreignkeys edition
+            config['editable'] = False
+            config['forceSelection'] = True
+        config['mode'] = 'local'
+        config['triggerAction'] = 'all'
+        
+    # number field
+    elif field_class_name in ['DecimalField', 'FloatField', 'IntegerField', 'PositiveIntegerField', 'PositiveSmallIntegerField']:
+        config['xtype'] = 'numberfield'
+        if  isinstance(ofield, forms.IntegerField):
+            config['allowDecimals'] = False
+            # if ofield.__class__.__name__ in ['PositiveIntegerField', 'PositiveSmallIntegerField']:
+            #, 'PositiveSmallIntegerField']:
+                # extfield['allowNegative'] = False
+        else:
+            config['allowDecimals'] = True
+            config['decimalPrecision'] = 2
+            config['decimalSeparator'] = '.'                   
+ 
+    # textfield
+    elif field_class_name in ['CharField', 'TextInput', 'Textarea']:
+        config['xtype'] = 'textfield'
+        if hasattr(ofield, 'widget'):
+            if isinstance(ofield.widget, forms.widgets.PasswordInput):
+                config['inputType'] = 'password'
+            elif isinstance(ofield.widget, forms.widgets.Textarea):
+                config['xtype'] = 'textarea'
+                v = ofield.widget.attrs.get('cols', None)
+                if v:
+                    config['width'] = int(v) * CHAR_PIXEL_WIDTH 
+                v = ofield.widget.attrs.get('rows', None)
+                if v:
+                    config['height'] = int(v) * CHAR_PIXEL_HEIGHT
+            if ofield.min_length:
+                config['minLength'] = ofield.min_length 
+            if ofield.max_length:
+                config['maxLength'] = ofield.max_length
+ 
+    elif field_class_name == 'DateField':
+        config['xtype'] = 'datefield'
+        config['format'] = utils.DateFormatConverter(to_extjs = form_field.input_formats[0])
+    elif field_class_name == 'TimeField':
+        config['xtype'] = 'timefield'
+        config['increment'] = 30
+        config['format'] = utils.DateFormatConverter(to_extjs = form_field.input_formats[0])
+        config['width'] = 60
+        config['value'] = value and value.strftime(ofield.input_formats[0]) or ''
+    # datetime : use sakis xdatetime ext.ux
+    elif field_class_name == 'DateTimeField':
+        config['xtype'] = 'xdatetime'
+        # todo : ugly !!
+        date_format = form_field.input_formats[0]
+        (datef, timef) = date_format.split(' ')
+        config['timeFormat'] = utils.DateFormatConverter(to_extjs = timef)
+        config['timeWidth']  = 60
+        config['dateWidth']  = 100
+        config['dateFormat'] = utils.DateFormatConverter(to_extjs = datef)
+        config['hiddenFormat'] = utils.DateFormatConverter(to_extjs = date_format)
+        if value:
+           # config['value'] = value
+            config['dateConfig'] = {'value':value.strftime(datef)}
+            config['timeConfig'] = {'value':value.strftime(timef)}
+        else:
+            #config['value'] = ''
+            config['dateConfig'] = {'value':''}
+            config['timeConfig'] = {'value':''}
+        
+    elif ofield.__class__.__name__ == 'URLField':
+        config['xtype'] = 'textfield'
+        config['vtype'] = 'url'
+    elif ofield.__class__.__name__ == 'EmailField':
+        config['xtype'] = 'textfield'
+        config['vtype'] = 'email'
+    elif ofield.__class__.__name__ in ['BooleanField', 'CheckboxInput']:
+        config['xtype'] = 'checkbox'
+        if value:
+            config['value'] = value
+            config['checked'] = value
+
+    # the field.ext attribute can be used as an dict overrider if needed
+    e = getattr(ofield, 'ext', None)
+    if e:
+        config.update(e)
+            
+    return config
+    
+class ExtJsField(object):
+    def __init__(self, field_name, django_field):
+        self.config = {}
+        # set some default config options at init
+        self.config['name'] = u'%s' % field_name
+        self.config['fieldLabel'] = u'%s' % (django_field.label or field_name)
+        self.config['allowBlank'] = not(django_field.required)
+        self.config['invalidText'] = u'%s' % django_field.help_text or ''
+        # init the value if any
+        self.config['value'] = ''
+        if django_field.initial:
+            self.config['value'] = django_field.initial
+        # apply html style if any
+        s = django_field.widget.attrs.get('style', None)
+        if s:
+           self.config['style'] = s
+        # width based on django widget 'size' attr
+        v = django_field.widget.attrs.get('size', None)
+        if v:
+            self.config['width'] = v * CHAR_PIXEL_WIDTH           
+        # override any config provided in the field definition
+        e = getattr(django_field, 'ext', None)
+        if e:
+            for item in e.keys():
+                self.config[item] = e[item]
+                
+    def getConfig(self):
+        return self.config
+ 
+   
+                
+        
 class ExtJsForm(object):
     """ 
         .add a as_extjs method to forms.Form or forms.ModelForm; this method returns a formpanel json config, with all fields, buttons and logic
@@ -61,228 +230,20 @@ class ExtJsForm(object):
             # radiogroups
             # decimal : max_digits, decimal_places, negative
             # number formatting
-            #if getattr(self, 'instance', None):
-                #for lfield in self.instance._meta.fields: 
-                    #print 'FIELD INSTANCE :', lfield
-                    #print dir(lfield)
-            #print 'self.fields', self.fields
+
+            
             for field in self.fields:
                 if field in excludes: continue
                 ofield = self.fields[field]
-                #print dir(ofield)
-                #print dir(ofield)
-                #print '************',field, ofield, ofield.__class__.__name__
-                extfield = None
-                defaultConfig = {}
-                defaultConfig['name'] = u'%s' % field
-                defaultConfig['fieldLabel'] = u'%s' % (ofield.label or field)
-                defaultConfig['allowBlank'] = not(ofield.required)
-                
-                defaultConfig['value'] = ''
-                if self.initial.get(field, '') not in ['', None]:
-                    defaultConfig['value'] = self.initial[field]
-                elif ofield.initial:
-                    defaultConfig['value'] = ofield.initial
-        
-                s = ofield.widget.attrs.get('style', None)
-                if s:
-                    defaultConfig['style'] = s
-                    
-              #  print field, 'initial', ofield.initial, self.initial.get(field, ''), '---'
-              
-                # field specific ext params
-                e = getattr(ofield, 'ext', None)
-                if e:
-                    for item in e.keys():
-                        defaultConfig[item] = e[item]
-                         
-                # width based on django widget 'size' attr
-                v = ofield.widget.attrs.get('size', None)
-                if v:
-                    defaultConfig['width'] = v * CHAR_PIXEL_WIDTH
-                
-                blank_config = {
-                    'value':None
-                }
-                    
-                # hidden
-                if ofield.widget.__class__.__name__ == 'HiddenInput':
-                    extfield = blank_config.copy()
-                    extfield['xtype'] = 'hidden'
-                    extfield['name'] = field
-                    extfield['value'] = ofield.initial or ''
-                    if getattr(self, 'instance', None) and getattr(self.instance, field):
-                        extfield['value'] = getattr(self.instance, field)
-                    extfield.update(defaultConfig)
-                    ext_fields.append(extfield)                
-                    
-                # foreignkeys or custom choices
-                elif ofield.__class__.__name__ in ['ModelChoiceField', 'TypedChoiceField'] or getattr(ofield, 'choices', None):
-                    #extfield = defaultConfig.copy()
-                    extfield = blank_config.copy()
-                    extfield['xtype'] = 'combo' 
-                    extfield['blankText'] = field + ' :' 
-                    choices= [[c[0], c[1]] for c in ofield.choices]
-                    extfield['store'] = "new Ext.data.SimpleStore({fields: ['id','display'],  data : %s })" % ( utils.JSONserialise(choices))
-                    extfield['valueField'] = 'id'
-                    extfield['displayField'] = 'display'
-                    extfield['hiddenName'] = field
-                    if ofield.__class__.__name__  in ['ModelChoiceField', 'TypedChoiceField'] : 
-                        extfield['editable'] = False
-                        extfield['forceSelection'] = True
+
+                value = getattr(self, 'instance', None) and getattr(self.instance, field) or None
+                if value and ofield.__class__.__name__ == 'ModelChoiceField':
+                        value = getattr(self.instance, field).pk
                         
-                    extfield['mode'] = 'local'
-                    extfield['triggerAction'] = 'all'
-                    from django.core.exceptions import ObjectDoesNotExist
-                    try:
-                        if getattr(self, 'instance', None) and getattr(self.instance, field, None):
-                            if ofield.__class__.__name__ == 'ModelChoiceField':
-                                extfield['value'] = getattr(self.instance, field).pk
-                            else:
-                                extfield['value'] = u'%s' % getattr(self.instance, field)
-                    except ObjectDoesNotExist:
-                           extfield['value'] = ''
-                                
-                    extfield.update(defaultConfig)
-                    ext_fields.append(extfield)
-                    
-                # number field
-                elif ofield.__class__.__name__ in ['DecimalField', 'FloatField', 'IntegerField', 'PositiveIntegerField', 'PositiveSmallIntegerField']:
-                    #extfield = defaultConfig.copy()
-                    extfield = blank_config.copy()
-                    extfield['xtype'] = 'numberfield'
-                    if getattr(self, 'instance', None) and getattr(self.instance, field):
-                        extfield['value'] = getattr(self.instance, field)
-                    if  isinstance(ofield, forms.IntegerField):
-                        
-                        extfield['allowDecimals'] = False
-                        # if ofield.__class__.__name__ in ['PositiveIntegerField', 'PositiveSmallIntegerField']:
-                        #, 'PositiveSmallIntegerField']:
-                            # extfield['allowNegative'] = False
-                    else:
-                        extfield['allowDecimals'] = True
-                        extfield['decimalPrecision'] = 2
-                        extfield['decimalSeparator'] = '.'                   
-                    extfield.update(defaultConfig)
-                    ext_fields.append(extfield)
-                # textfield
-                elif ofield.__class__.__name__ == 'CharField':
-                    #extfield = defaultConfig.copy()
-                    extfield = blank_config.copy()
-                    extfield['xtype'] = 'textfield'
-                    if  isinstance(ofield.widget, forms.widgets.PasswordInput):
-                            extfield['inputType'] = 'password'
-                    if  isinstance(ofield.widget, forms.widgets.Textarea):
-                        extfield['xtype'] = 'textarea'
-                        v = ofield.widget.attrs.get('cols', None)
-                        if v:
-                            extfield['width'] = int(v) * CHAR_PIXEL_WIDTH 
-                            #print extfield['width']
-                        v = ofield.widget.attrs.get('rows', None)
-                        if v:
-                            extfield['height'] = int(v) * CHAR_PIXEL_HEIGHT
-                            #print extfield['height']
-                    if ofield.min_length:
-                        extfield['minLength'] = ofield.min_length 
-                    if ofield.max_length:
-                        extfield['maxLength'] = ofield.max_length
-                    if getattr(self, 'instance', None) and getattr(self.instance, field, None):
-                        extfield['value'] = getattr(self.instance, field)
-                    # if getattr(self, 
-                        # extfield
-                    extfield.update(defaultConfig)
-                    ext_fields.append(extfield)
-                elif ofield.__class__.__name__ == 'DateField':
-                    #extfield = defaultConfig.copy()
-                    extfield = blank_config.copy()
-                    extfield['xtype'] = 'datefield'
-                    extfield['format'] = utils.DateFormatConverter(to_extjs = ofield.input_formats[0])
-                    if getattr(self, 'instance', None) and getattr(self.instance, field, None):
-                        dval = getattr(self.instance, field)
-                    extfield.update(defaultConfig)
-                    ext_fields.append(extfield)
-                elif ofield.__class__.__name__ == 'URLField':
-                    #extfield = defaultConfig.copy()
-                    extfield = blank_config.copy()
-                    extfield['xtype'] = 'textfield'
-                    extfield['vtype'] = 'url'
-                    if getattr(self, 'instance', None) and getattr(self.instance, field, None):
-                        extfield['value'] = getattr(self.instance, field)
-                    extfield.update(defaultConfig)
-                    ext_fields.append(extfield)
-                elif ofield.__class__.__name__ == 'TimeField':
-                    #extfield = defaultConfig.copy()
-                    extfield = blank_config.copy()
-                    extfield['xtype'] = 'timefield'
-                    extfield['increment'] = 30
-                    extfield['format'] = utils.DateFormatConverter(to_extjs = ofield.input_formats[0])
-                    extfield['width'] = 60
-                    if getattr(self, 'instance', None) and getattr(self.instance, field, None):
-                        try:
-                            extfield['value'] = getattr(self.instance, field).strftime(ofield.input_formats[0])
-                        except ValueError:
-                            #extfield['value'] = None
-                            pass
-                    extfield.update(defaultConfig)
-                    ext_fields.append(extfield)
-                # datetime : use sakis xdatetime ext.ux
-                elif ofield.__class__.__name__ == 'DateTimeField':
-                    #extfield = defaultConfig.copy()
-                    extfield = blank_config.copy()
-                    extfield['xtype'] = 'xdatetime'
-                  #  print 'xdatetime', ofield.initial, extfield['value'] 
-                    # todo : ugly !!
-                    date_format = ofield.input_formats[0]
-                    (datef, timef) = date_format.split(' ')
-                    extfield['timeFormat'] = utils.DateFormatConverter(to_extjs = timef)
-                    extfield['timeWidth']  = 60
-                    extfield['dateWidth']  = 100
-                    extfield['dateFormat'] = utils.DateFormatConverter(to_extjs = datef)
-                    extfield['hiddenFormat'] = utils.DateFormatConverter(to_extjs = date_format)
-                    #print field, 'format:', date_format, datef, timef
-                    if getattr(self, 'instance', None) and getattr(self.instance, field, None):
-                        try:
-                            extfield['value'] = getattr(self.instance, field).strftime(date_format)
-                            extfield['dateConfig'] = {'value':getattr(self.instance, field).strftime(datef)}
-                            extfield['timeConfig'] = {'value':getattr(self.instance, field).strftime(timef)}
-                        except ValueError:
-                            extfield['value'] = 0
-                            extfield['dateConfig'] = {'value':0}
-                            extfield['timeConfig'] = {'value':0}
-                    else:
-                        if extfield['value'].__class__.__name__ == 'datetime':
-                            extfield['dateConfig'] = {'value':extfield['value'].strftime(datef)}
-                            extfield['timeConfig'] = {'value':extfield['value'].strftime(timef)}
-                            extfield['value'] = extfield['value'].strftime(date_format)
-                        else:
-                            extfield['value'] = ''
-                            extfield['dateConfig'] = {'value':''}
-                            extfield['timeConfig'] = {'value':''}
-                    extfield.update(defaultConfig)
-                    ext_fields.append(extfield)                
-                # email
-                elif ofield.__class__.__name__ == 'EmailField':
-                    #extfield = defaultConfig.copy()
-                    extfield = blank_config.copy()
-                    extfield['xtype'] = 'textfield'
-                    extfield['vtype'] = 'email'
-                    if getattr(self, 'instance', None) and getattr(self.instance, field, None):
-                        extfield['value'] = getattr(self.instance, field)
-                    extfield.update(defaultConfig)
-                    ext_fields.append(extfield)
-                # checkboxes
-                elif ofield.__class__.__name__ == 'BooleanField':
-                   # print 'BooleanField', u'%s' % ofield.label
-                    #extfield = defaultConfig.copy()
-                    extfield = blank_config.copy()
-                    
-                    extfield['xtype'] = 'checkbox'
-                    if getattr(self, 'instance', None) and getattr(self.instance, field, -1) != '-1':
-                        extfield['value'] = getattr(self.instance, field)
-                        extfield['checked'] = getattr(self.instance, field)
-                    else:
-                        extfield['checked'] = ofield.initial
-                    extfield.update(defaultConfig)
-                    ext_fields.append(extfield)
-         
+                extfield = getFieldConfig(field, ofield, value)
+                #print 'getFieldConfig', extfield
+                
+                ext_fields.append(extfield)   
+                
             return ext_fields
+           

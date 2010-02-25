@@ -1,6 +1,8 @@
  
 import utils
 
+import forms
+
 # width, dateFormat, renderer, hidden, align, type
 
 
@@ -29,65 +31,77 @@ class SimpleGrid(object):
 class VirtualField(object):
     def __init__(self, name):
         self.name = name
+
+
         
 class ModelGrid(object):
 
     def __init__(self, model):
-        self.model = model
-        self.fields = []
+        self.model = model      # the model to use as reference
+        self.fields = []        # holds the extjs fields
+        self.base_fields = []   # holds the base model fields
         
         model_fields = self.model._meta._fields()
-        
         excludes = getattr(self.Meta, 'exclude', [])
         # reorder cols if needed
         order = getattr(self.Meta, 'order', None)
         if order and len(order) > 0:
-            base_fields  = []
             for field in order:
                 added = False
                 for f in model_fields:
                     if f.name == field:
                         added = True
-                        base_fields.append(f)
+                        self.base_fields.append(f)
                 if not added:
-                    base_fields.append(VirtualField(field))
+                    self.base_fields.append(VirtualField(field))
         else:
-            base_fields = model_fields
+            self.base_fields = model_fields
             
         
-        for field in base_fields:
+        for field in self.base_fields:
             if field.name in excludes:
                 continue
             if field.__class__.__name__ == VirtualField:
                 self.fields.append(self.Meta.fields_conf[field.name])
                 continue
-            #print field, dir(field)
             fdict = {'name':field.name, 'header': field.name}
             if field.name == 'id':
                 fdict['id']='id'
             if  field.__class__.__name__ == 'DateTimeField':
-                fdict['type'] = 'date'
+                fdict['type'] = 'datetime'
                 fdict['dateFormat'] = 'Y-m-d H:i:s'
+                fdict['format'] = 'Y-m-d H:i:s'
+                #fdict['editor'] = "new Ext.ux.form.DateTime({hiddenFormat:'Y-m-d H:i', dateFormat:'Y-m-D', timeFormat:'H:i'})"
             if  field.__class__.__name__ == 'DateField':
                 fdict['type'] = 'date'
                 fdict['dateFormat'] = 'Y-m-d'
+                fdict['format'] = 'Y-m-d'
+                #fdict['editor'] = "new Ext.form.DateField({format:'Y-m-d'})"
             elif field.__class__.__name__ == 'IntegerField':
                 fdict['type'] = 'int'
+                #fdict['editor'] = 'new Ext.form.NumberField()'
             elif field.__class__.__name__ == 'BooleanField':
                 fdict['type'] = 'boolean'
+                #fdict['editor'] = 'new Ext.form.Checkbox()'
             elif field.__class__.__name__ == 'DecimalField':
                 fdict['type'] = 'float'
                 fdict['renderer'] = 'function(v) {return (v.toFixed && v.toFixed(2) || 0);}'
+                #fdict['editor'] = 'new Ext.form.NumberField()'
             elif  field.__class__.__name__ == 'ForeignKey':
                 pass
             if getattr(self.Meta, 'fields_conf', {}).has_key(field.name):
                 fdict.update(self.Meta.fields_conf[field.name])
+                
                # print fdict
             self.fields.append(fdict)
         #for field in self.model:
         #    print field
    
-
+    def get_field(self, name):  
+        for f in self.fields:
+            if f.get('name') == name:
+                return f
+        return None
     def get_fields(self, colModel):  
         """ return this grid field list
             . can include hidden fields
@@ -130,6 +144,8 @@ class ModelGrid(object):
                     val = getattr(item, field['name'], '')
                     if val:
                         if field.get('type', '') == 'date':
+                            val = val.strftime(utils.DateFormatConverter(to_python = field['dateFormat'] ) )
+                        elif field.get('type', '') == 'datetime':
                             val = val.strftime(utils.DateFormatConverter(to_python = field['dateFormat'] ) )
                         else:
                             val = utils.JsonCleanstr(val)
@@ -190,3 +206,12 @@ class ModelGrid(object):
     class Meta:
         pass
 
+
+class EditableModelGrid(ModelGrid):
+    def __init__(self, *args, **kwargs):
+        super(EditableModelGrid, self).__init__(*args, **kwargs)
+        # add editors
+        for field in self.base_fields:
+            field_conf = self.get_field(field.name)
+            if not (getattr(self.Meta, 'fields_conf', {}).has_key(field.name) and self.Meta.fields_conf[field.name].has_key('editor')):
+                field_conf['editor'] = forms.getFieldConfig(field.name, field)
