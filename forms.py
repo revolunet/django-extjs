@@ -8,15 +8,16 @@ CHAR_PIXEL_HEIGHT = 15
 
 import utils
 
-def getModelForm(modelref, exclude_list  = [], fields_list = []):
+def getExtJsModelForm(modelref, exclude_list  = [], fields_list = []):
     class FormFromModel(forms.ModelForm):
         class Meta:
             model = modelref
             exclude = exclude_list 
             fields = fields_list
         def __init__(self, *args, **kwargs):
-            print args, kwargs
+            #print args, kwargs
             super(FormFromModel, self).__init__(*args, **kwargs)
+        # todo : autoclean for date / time fields
     return FormFromModel
 
 def getFieldConfig(field_name, django_field, value = None):

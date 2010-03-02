@@ -222,9 +222,9 @@ class EditableModelGrid(ModelGrid):
             if not (getattr(self.Meta, 'fields_conf', {}).has_key(field.name) and self.Meta.fields_conf[field.name].has_key('editor')):
                 field_conf['editor'] = forms.getFieldConfig(field.name, field)
                 
-    def update_instances_from_json(self, json):
+    def update_instances_from_json(self, json, insert_new = True):
         """ udpate this grid model instances from provided json
-            json example : update=[{"id":1, "data":{"username":"root2","first_name":"", "last_name":"bouqui", "is_staff":false, "is_superuser":true}}]
+            json example : update=[{"id":1, "username":"root2","first_name":"", "last_name":"bouqui", "is_staff":false, "is_superuser":true}]
             only modified data is sent from client
         """
         from django.utils import simplejson
@@ -237,25 +237,37 @@ class EditableModelGrid(ModelGrid):
             # get instance for this line
             # todo : dynamic pk
             pk = item_data.get('id', None)
-            #print 'pk', pk, self.model.pk
+            form_data = item_data.copy()
+            del form_data['id']
             instance = self.model()
-            
+            #print pk, form_data
             if pk:
+                # get the related instance
                 instance = self.model.objects.get(pk = pk)
-         #   print instance    
-            form = forms.getModelForm(self.model, fields_list = item_data['data'].keys())
-            form = form(item_data['data'], instance = instance)
-            
+            else:
+                if not insert_new:
+                    # skip if new and dont insert
+                    continue
+            # get a ModelForm based on supplied fields
+            #print 1
+            form = forms.getExtJsModelForm(self.model, fields_list = form_data.keys())
+            #print 2
+            form = form(form_data, instance = instance)
+            #print 3
             forms_items.append(form)
-            
+            #print 4
             if not form.is_valid():
+                print 'invalid form', form.errors
                 errors.append(form.errors)
                 
         if not errors:
             for form in forms_items:
+             #   print 5
                 form.save()
+              #  print 6
             return True
         else:
             # todo : detailed errors
+           # print 7
             raise Exception(errors)
                 
