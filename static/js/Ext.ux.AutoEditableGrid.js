@@ -40,7 +40,7 @@ Ext.ux.AutoEditableGrid = Ext.extend(Ext.ux.AutoGrid, {
                 var myStore = this.getStore();
                 var r = new myStore.recordType(initial, 0); 
                 myStore.insert(0, r);  
-                this.startEditing(0, 1);
+                this.startEditing(0, 2);
         }
         this.btn_delete = new Ext.Button({
                         text:'delete'
@@ -102,10 +102,11 @@ Ext.ux.AutoEditableGrid = Ext.extend(Ext.ux.AutoGrid, {
                                         alert("Erreur : " + json.msg);
                                     }
                                     else{
-                                        this.btn_save.stopBlink();
-                                        this.btn_save.disable();
+                                        
                                         this.getStore().commitChanges();
                                         this.getStore().reload();
+                                        this.btn_save.stopBlink();
+                                        this.btn_save.disable();
                                         }
                                },
                                scope: this,
@@ -113,6 +114,7 @@ Ext.ux.AutoEditableGrid = Ext.extend(Ext.ux.AutoGrid, {
                             });
                         }
                         ,counter:0
+                        ,blinking:false
                         ,task_blink:{
                             run: function(){
                                 nclass = (this.btn_save.counter%2==0)?'icon-disk-red':'icon-disk';
@@ -123,12 +125,17 @@ Ext.ux.AutoEditableGrid = Ext.extend(Ext.ux.AutoGrid, {
                             interval: 500 
                         }
                         ,startBlink:function(e) {
+                             if (this.blinking) return;
+                         //    console.log('startBlink', this.task_blink);
                              this.enable();
                              Ext.TaskMgr.start(this.task_blink);
+                             this.blinking = true;
                         }
                         ,stopBlink:function(e) {
-                            this.setIconClass('icon-disk');
+                           // console.log('stopblink', this.task_blink);
                             Ext.TaskMgr.stop(this.task_blink);
+                            this.setIconClass('icon-disk');
+                            this.blinking = false;
                         }
                     });
                     
