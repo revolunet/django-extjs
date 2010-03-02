@@ -14,13 +14,13 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
         Ext.ux.AutoGridPanel.superclass.initComponent.call(this);
         // register to the store's metachange event
         if (this.store) {
-             
+             //console.log('this.store', this.store);
            // this.store.on("load", this.onStoreLoad, this);
              this.store.on("metachange", this.onMetaChange, this);
        //     this.store.on("beforeload", function() {alert('beforeload')}, this);
         //     this.store.on("loadexception ", function() {alert('loadexception ')}, this);
        //    this.store.on("load", function() {alert('load');}, this);
-
+            //console.log('init this.store', this.store.sortInfo);
         }
         // Store the column model to the server on change
         if (this.autoSave) {
@@ -46,7 +46,7 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
     // },
     
     onShow:function() {
-        console.log('autogrid onShow');
+       // console.log('autogrid onShow');
     },
     
     // onRender:function() {
@@ -59,9 +59,10 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
         var c;
         var config = [];
         var lookup = {};
+        
  //  alert('onMetaChange');
         if (this.plugin) {
-            console.log(this.plugin);
+           // console.log(this.plugin);
             config[config.length] = this.plugin;
         }
         
@@ -95,20 +96,25 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
                 config[config.length] = c;
                 //config[config.length].editor = c.editor;
                 lookup[c.id] = c;
-           //     console.log(config);
+            //    console.log(config);
             }
         }
         // Store new configuration
         
-       // this.colModel.config = config;
-    //    this.colModel.lookup = lookup;
         //
         // Re-render grid
         //alert(this.rendered);
         
+        this.getColumnModel().setConfig(config);
+        
+        // if remoteSort=false then dont overrride local sortInfo
+        // if (!this.remoteSort) {
+            // store.sortInfo = this.sortInfo
+        // }
+        // console.log(store.sortInfo.field, meta.sortInfo.field);
+        
         if (this.rendered) {    
-
-            this.getColumnModel().setConfig(config);
+            
             //this.store.reader.jsonData.metaData.fields);         
             this.getView().syncFocusEl(0);
             
@@ -118,13 +124,14 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
                         { id: "reset_colModel", text: "Réinitialiser les colonnes", cls: "xg-hmenu-reset-columns", handler:function(btn, event) {this.razColumModel();}, scope:this }
                     );
                }
+               
         }
  
       
     },
 
     onStoreLoad : function() {
-      //   console.log('onStoreLoad 1');
+        //console.log('onStoreLoad 1');
         var view = this.getView();
         if((true === view.forceFit) || (true === this.forceFit)) {
             view.fitColumns(); 
@@ -150,7 +157,7 @@ Ext.ux.AutoGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
     saveColumModel: function() {
         // Get Id, width and hidden propery from every column
        // console.log('saveColumModel');
-        var c, config = this.colModel.config;
+        var c, config = this.getColumnModel().config;
         var fields = [];
         for (var i = 0, len = config.length; i < len; i++) {
             c = config[i];

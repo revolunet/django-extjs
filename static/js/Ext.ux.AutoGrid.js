@@ -4,6 +4,8 @@ Ext.ux.AutoGrid = Ext.extend(Ext.ux.AutoGridPanel, {
     ,stripeRows:true
     ,deferredRender :true
     ,autoSave:false
+    ,remoteSort:true
+    ,sortInfo:{}
     ,initComponent:function() {
         this.pagesize = this.pagesize || 10;
         
