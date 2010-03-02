@@ -6,6 +6,11 @@ Ext.ux.AutoGrid = Ext.extend(Ext.ux.AutoGridPanel, {
     ,autoSave:false
     ,remoteSort:true
     ,sortInfo:{}
+    // ,sm:new Ext.grid.RowSelectionModel({})
+    // ,reader: new Ext.data.JsonReader({
+            // root:'rows'
+            // ,id:'id'
+     // })
     ,initComponent:function() {
         this.pagesize = this.pagesize || 10;
         
