@@ -5,11 +5,11 @@ Django [Form][1] and [ModelForm][2] power for your [ExtJs][3] apps.
 
 Convert your forms.Form and forms.ModelForm to extjs and handles the form submission like any django form.
 
-Generate custom ExtJs dynamic grids from django models.
+Generate custom ExtJs dynamic grids from django querysets. You can also set your grids as Editable.
 
 Tested with ExtJs 3 and Django >= 1 Feedback needed  : <julien@bouquillon.com>
 
-There is a full working demo project based on my django-skeleton here : [ExtJs django-skeleton branch][8]
+There is a full working demo project based on my django-skeleton here : [ExtJs django-skeleton branch][8] this is where you should start.
 
 **Grid example :**
 

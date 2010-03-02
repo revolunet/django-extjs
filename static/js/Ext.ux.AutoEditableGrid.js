@@ -47,9 +47,35 @@ Ext.ux.AutoEditableGrid = Ext.extend(Ext.ux.AutoGrid, {
                         ,iconCls:'icon-user_delete'
                         ,scope:this
                         ,handler:function() {
-                            alert('del');
+                         //   alert('del');
                             var records = this.getSelectionModel().getSelections();
-                            // todo messagebox confirm
+                            dels = [];
+                            Ext.each(records, function(item, index, all) {
+                                dels.push(item.id);
+                            },this);
+ 
+                         //   console.log(dels);
+                            var sure = confirm("Sure to delete these "+ dels.length + " items ?");
+                            if (dels.length > 0 ) {
+                                Ext.Ajax.request({
+                                   url: this.store.proxy.url,
+                                   method :'POST',
+                                   callback : function(options, success, response) {
+                                        json  = Ext.decode(response.responseText);
+                                        if (!success || !json.success) {
+                                            alert("Erreur : " + json.msg);
+                                        }
+                                        else{
+                                            // this.btn_save.stopBlink();
+                                            // this.btn_save.disable();
+                                            // this.getStore().commitChanges();
+                                            this.getStore().reload();
+                                            }
+                                   },
+                                   scope: this,
+                                   params: { delete: dels.join(',')}
+                                });
+                            }
                         }
                     });
         this.btn_save = new Ext.Button({
