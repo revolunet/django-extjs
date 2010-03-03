@@ -8,6 +8,19 @@ CHAR_PIXEL_HEIGHT = 15
 
 import utils
 
+ 
+def DateField_ExtJs_clean(value):
+    value = value.split('T')[0]
+    return value
+
+def DateTimeField_ExtJs_clean(value):
+    value = value.replace('T', ' ')
+    return value
+
+def TimeField_ExtJs_clean(value):
+    #value = value.split('T')[1]
+    return value
+    
 def getExtJsModelForm(modelref, exclude_list  = [], fields_list = []):
     class FormFromModel(forms.ModelForm):
         class Meta:
@@ -15,9 +28,17 @@ def getExtJsModelForm(modelref, exclude_list  = [], fields_list = []):
             exclude = exclude_list 
             fields = fields_list
         def __init__(self, *args, **kwargs):
-            #print args, kwargs
             super(FormFromModel, self).__init__(*args, **kwargs)
-        # todo : autoclean for date / time fields
+             
+    ExtJsForm.addto(FormFromModel)
+    
+    # override Field.clean for date fields and ExtJs formats
+    for item in FormFromModel.base_fields:
+         #print 'class field', item, FormFromModel.base_fields[item]
+         o = FormFromModel.base_fields[item]
+         if o.__class__.__name__ in ['DateField','DateTimeField','TimeField']:
+            o.clean = globals()['%s_ExtJs_clean' % o.__class__.__name__]
+            
     return FormFromModel
 
 def getFieldConfig(field_name, django_field, value = None):
@@ -44,6 +65,7 @@ def getFieldConfig(field_name, django_field, value = None):
     
     e = getattr(ofield, 'widget', None)
     if e:
+        #print 'e', e
         s = ofield.widget.attrs.get('style', None)
         if s:
             config['style'] = s
@@ -55,7 +77,7 @@ def getFieldConfig(field_name, django_field, value = None):
             
     
         
-    #print field_name, field_class_name
+   # print field_name, field_class_name
     
     if field_class_name == 'HiddenInput':
         config['xtype'] = 'hidden'
@@ -112,9 +134,11 @@ def getFieldConfig(field_name, django_field, value = None):
     elif field_class_name == 'DateField':
         config['xtype'] = 'datefield'
         config['format'] = utils.DateFormatConverter(to_extjs = form_field.input_formats[0])
+        #config['hiddenFormat'] = utils.DateFormatConverter(to_extjs = form_field.input_formats[0])
     elif field_class_name == 'TimeField':
         config['xtype'] = 'timefield'
         config['increment'] = 30
+       # config['hiddenFormat'] = utils.DateFormatConverter(to_extjs = form_field.input_formats[0])
         config['format'] = utils.DateFormatConverter(to_extjs = form_field.input_formats[0])
         config['width'] = 60
         config['value'] = value and value.strftime(ofield.input_formats[0]) or ''
@@ -170,6 +194,7 @@ class ExtJsField(object):
         if django_field.initial:
             self.config['value'] = django_field.initial
         # apply html style if any
+        #print django_field.widget
         s = django_field.widget.attrs.get('style', None)
         if s:
            self.config['style'] = s
@@ -206,8 +231,6 @@ class ExtJsForm(object):
         handler_submit = "function(btn) {console.log(this, btn);this.findParentByType(this.form_xtype).submitForm()}"
         handler_reset = "function(btn) {console.log(this, btn);this.findParentByType(this.form_xtype).resetForm()}"
         cls.ext_baseConfig = {
-            
-
         }
         
     @staticmethod

@@ -65,30 +65,46 @@ class ModelGrid(object):
                 self.fields.append(self.Meta.fields_conf[field.name])
                 continue
             fdict = {'name':field.name, 'header': field.name}
+            
+            if getattr(field, 'verbose_name', None) and field.verbose_name != field.name:
+                fdict['tooltip'] = u'%s' %  field.verbose_name
+            
             if field.name == 'id':
                 fdict['id']='id'
             if  field.__class__.__name__ == 'DateTimeField':
                 fdict['type'] = 'datetime'
+                fdict['xtype'] = 'datecolumn' 
                 fdict['dateFormat'] = 'Y-m-d H:i:s'
                 fdict['format'] = 'Y-m-d H:i:s'
+
                 #fdict['editor'] = "new Ext.ux.form.DateTime({hiddenFormat:'Y-m-d H:i', dateFormat:'Y-m-D', timeFormat:'H:i'})"
             if  field.__class__.__name__ == 'DateField':
                 fdict['type'] = 'date'
+                fdict['xtype'] = 'datecolumn' 
                 fdict['dateFormat'] = 'Y-m-d'
                 fdict['format'] = 'Y-m-d'
+                #fdict['renderer'] = 'Ext.util.'
                 #fdict['editor'] = "new Ext.form.DateField({format:'Y-m-d'})"
             elif field.__class__.__name__ == 'IntegerField':
-                fdict['type'] = 'int'
+                fdict['xtype'] = 'numbercolumn'
                 #fdict['editor'] = 'new Ext.form.NumberField()'
             elif field.__class__.__name__ == 'BooleanField':
-                fdict['type'] = 'boolean'
+                fdict['xtype'] = 'booleancolumn'
                 #fdict['editor'] = 'new Ext.form.Checkbox()'
             elif field.__class__.__name__ == 'DecimalField':
-                fdict['type'] = 'float'
+                fdict['xtype'] = 'numbercolumn '
                 fdict['renderer'] = 'function(v) {return (v.toFixed && v.toFixed(2) || 0);}'
                 #fdict['editor'] = 'new Ext.form.NumberField()'
             elif  field.__class__.__name__ == 'ForeignKey':
                 pass
+                # renderer : display FK str
+                # choices
+            elif field.choices:
+                #print 'FIELD CHOICES', field.choices
+                a = {}
+                for c in field.choices:
+                    a[c[0]] = c[1]
+                fdict['renderer'] = 'function(v) {a = %s; return a[v] || "";}' % utils.JSONserialise(a)
             if getattr(self.Meta, 'fields_conf', {}).has_key(field.name):
                 fdict.update(self.Meta.fields_conf[field.name])
                 
@@ -149,9 +165,9 @@ class ModelGrid(object):
                     val = getattr(item, field['name'], '')
                     if val:
                         if field.get('type', '') == 'date':
-                            val = val.strftime(utils.DateFormatConverter(to_python = field['dateFormat'] ) )
+                            val = val.strftime(utils.DateFormatConverter(to_python = field['format'] ) )
                         elif field.get('type', '') == 'datetime':
-                            val = val.strftime(utils.DateFormatConverter(to_python = field['dateFormat'] ) )
+                            val = val.strftime(utils.DateFormatConverter(to_python = field['format'] ) )
                         else:
                             val = utils.JsonCleanstr(val)
                     else:
@@ -219,8 +235,12 @@ class EditableModelGrid(ModelGrid):
         # add editors
         for field in self.base_fields:
             field_conf = self.get_field(field.name)
-            if not (getattr(self.Meta, 'fields_conf', {}).has_key(field.name) and self.Meta.fields_conf[field.name].has_key('editor')):
+            f = self.get_base_field(field.name)
+           # print dir(f)
+            #print 'base_field', f, f.widget
+            if field_conf and not (getattr(self.Meta, 'fields_conf', {}).has_key(field.name) and self.Meta.fields_conf[field.name].has_key('editor')):
                 field_conf['editor'] = forms.getFieldConfig(field.name, field)
+                #print 'getFieldConfig editor', field.name, field_conf['editor']
                 
     def update_instances_from_json(self, json, insert_new = True):
         """ udpate this grid model instances from provided json
@@ -240,7 +260,7 @@ class EditableModelGrid(ModelGrid):
             form_data = item_data.copy()
             del form_data['id']
             instance = self.model()
-            #print pk, form_data
+           # print pk, form_data
             if pk:
                 # get the related instance
                 instance = self.model.objects.get(pk = pk)
@@ -249,25 +269,20 @@ class EditableModelGrid(ModelGrid):
                     # skip if new and dont insert
                     continue
             # get a ModelForm based on supplied fields
-            #print 1
+            # todo : force mandatory fields !
+
             form = forms.getExtJsModelForm(self.model, fields_list = form_data.keys())
-            #print 2
             form = form(form_data, instance = instance)
-            #print 3
             forms_items.append(form)
-            #print 4
             if not form.is_valid():
                 print 'invalid form', form.errors
                 errors.append(form.errors)
-                
+
         if not errors:
-            for form in forms_items:
-             #   print 5
+            for form in forms_items:             
                 form.save()
-              #  print 6
             return True
         else:
             # todo : detailed errors
-           # print 7
             raise Exception(errors)
                 

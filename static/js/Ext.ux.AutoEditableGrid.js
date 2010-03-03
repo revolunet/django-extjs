@@ -117,6 +117,7 @@ Ext.ux.AutoEditableGrid = Ext.extend(Ext.ux.AutoGrid, {
                         ,blinking:false
                         ,task_blink:{
                             run: function(){
+                                if (!this.btn_save) return;
                                 nclass = (this.btn_save.counter%2==0)?'icon-disk-red':'icon-disk';
                                 this.btn_save.setIconClass(nclass);
                                 this.btn_save.counter+=1;
@@ -149,6 +150,11 @@ Ext.ux.AutoEditableGrid = Ext.extend(Ext.ux.AutoGrid, {
         
         this.on('afteredit', function(e) {
             this.btn_save.startBlink();
+            }, this);
+        
+        this.on('beforedestroy', function(e) {
+            this.btn_save.stopBlink();
+            return true;
             }, this);
     } 
  
