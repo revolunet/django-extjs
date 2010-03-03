@@ -10,14 +10,17 @@ import utils
 
  
 def DateField_ExtJs_clean(value):
+    if value == '': return None
     value = value.split('T')[0]
     return value
 
 def DateTimeField_ExtJs_clean(value):
+    if value == '': return None
     value = value.replace('T', ' ')
     return value
 
 def TimeField_ExtJs_clean(value):
+    if value == '': return None
     #value = value.split('T')[1]
     return value
     
@@ -84,18 +87,29 @@ def getFieldConfig(field_name, django_field, value = None):
         config['name'] = field_name
     
     # foreignkeys or custom choices
-    elif field_class_name in ['ModelChoiceField', 'TypedChoiceField'] or getattr(ofield, 'choices', None):
+    elif field_class_name in ['ForeignKey', 'ModelChoiceField', 'TypedChoiceField'] or getattr(ofield, 'choices', None):
         config['xtype'] = 'combo' 
         config['blankText'] = field_name + ' :' 
-        choices= [[c[0], c[1]] for c in ofield.choices]
+        # removes the standard '-----'
+        form_field.empty_label = None
+        choices = form_field.choices
+        #print field_class_name, form_field.choices
+        #for i in form_field.choices:
+         #   print i
+        choices = [[c[0], c[1]] for c in choices]
+        # if field_class_name == 'ForeignKey' and not getattr(ofield, 'choices', None):
+            # choices = [[c[0], c[1]] for c in ]
+        
+        
         config['store'] = "new Ext.data.SimpleStore({fields: ['id','display'],  data : %s })" % ( utils.JSONserialise(choices))
         config['valueField'] = 'id'
         config['displayField'] = 'display'
         config['hiddenName'] = field_name
         if field_class_name in ['ModelChoiceField', 'TypedChoiceField'] : 
             # disable foreignkeys edition
-            config['editable'] = False
+            config['editable'] = True
             config['forceSelection'] = True
+            config['typeAhead'] = True
         config['mode'] = 'local'
         config['triggerAction'] = 'all'
         

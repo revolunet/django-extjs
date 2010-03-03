@@ -56,6 +56,7 @@ Ext.ux.AutoEditableGrid = Ext.extend(Ext.ux.AutoGrid, {
  
                          //   console.log(dels);
                             var sure = confirm("Sure to delete these "+ dels.length + " items ?");
+                            
                             if (dels.length > 0 ) {
                                 Ext.Ajax.request({
                                    url: this.store.proxy.url,
@@ -73,8 +74,8 @@ Ext.ux.AutoEditableGrid = Ext.extend(Ext.ux.AutoGrid, {
                                             }
                                    },
                                    scope: this,
-                                   params: { delete: dels.join(',')}
-                                });
+                                   params: { 'delete': dels.join(',')}
+                                })
                             }
                         }
                     });
