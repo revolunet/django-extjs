@@ -9,7 +9,7 @@ Generate custom ExtJs dynamic grids from django querysets. You can also set your
 
 Tested with ExtJs 3 and Django >= 1 Feedback needed  : <julien@bouquillon.com>
 
-There is a full working demo project based on my django-skeleton here : [ExtJs django-skeleton branch][8] this is where you should start.
+There is a full working demo project based on my django-skeleton here : [ExtJs django-skeleton branch][8] *this is where you should start*.
 
 **Grid example :**
 
