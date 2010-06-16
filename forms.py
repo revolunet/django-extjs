@@ -82,7 +82,7 @@ def getFieldConfig(field_name, django_field, value = None):
         
    # print field_name, field_class_name
     
-    if field_class_name == 'HiddenInput':
+    if ofield.widget.__class__.__name__ == 'HiddenInput':
         config['xtype'] = 'hidden'
         config['name'] = field_name
     
