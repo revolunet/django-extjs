@@ -147,26 +147,36 @@ def getFieldConfig(field_name, django_field, value = None):
  
     elif field_class_name == 'DateField':
         config['xtype'] = 'datefield'
-        config['format'] = utils.DateFormatConverter(to_extjs = form_field.input_formats[0])
+        dformat = form_field.input_formats
+        if dformat:
+            dformat = dformat[0]
+        config['format'] = utils.DateFormatConverter(to_extjs = dformat)
         #config['hiddenFormat'] = utils.DateFormatConverter(to_extjs = form_field.input_formats[0])
     elif field_class_name == 'TimeField':
         config['xtype'] = 'timefield'
         config['increment'] = 30
+        dformat = form_field.input_formats
+        if dformat:
+            dformat = dformat[0]
        # config['hiddenFormat'] = utils.DateFormatConverter(to_extjs = form_field.input_formats[0])
-        config['format'] = utils.DateFormatConverter(to_extjs = form_field.input_formats[0])
+        config['format'] = utils.DateFormatConverter(to_extjs = dformat)
         config['width'] = 60
         config['value'] = value and value.strftime(ofield.input_formats[0]) or ''
     # datetime : use sakis xdatetime ext.ux
     elif field_class_name == 'DateTimeField':
         config['xtype'] = 'xdatetime'
         # todo : ugly !!
-        date_format = form_field.input_formats[0]
-        (datef, timef) = date_format.split(' ')
+        datef = timef = date_format = None
+        
+        if form_field.input_formats:
+            date_format = form_field.input_formats[0]
+            (datef, timef) = date_format.split(' ')
         config['timeFormat'] = utils.DateFormatConverter(to_extjs = timef)
         config['timeWidth']  = 60
         config['dateWidth']  = 100
         config['dateFormat'] = utils.DateFormatConverter(to_extjs = datef)
-        config['hiddenFormat'] = utils.DateFormatConverter(to_extjs = date_format)
+        if date_format:
+            config['hiddenFormat'] = utils.DateFormatConverter(to_extjs = date_format)
         if value:
            # config['value'] = value
             config['dateConfig'] = {'value':value.strftime(datef)}
