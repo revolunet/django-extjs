@@ -1,7 +1,7 @@
 django-extjs
 ============
 
-Django [Form][1] and [ModelForm][2] power for your [ExtJs][3] apps. See {ExtJS dual licence][9]
+Django [Form][1] and [ModelForm][2] power for your [ExtJs][3] apps. See [ExtJS dual licence][9]
 
 Convert your forms.Form and forms.ModelForm to extjs and handles the form submission like any django form.
 
