@@ -1,7 +1,7 @@
 django-extjs
 ============
 
-Django [Form][1] and [ModelForm][2] power for your [ExtJs][3] apps.
+Django [Form][1] and [ModelForm][2] power for your [ExtJs][3] apps. See {ExtJS dual licence][9]
 
 Convert your forms.Form and forms.ModelForm to extjs and handles the form submission like any django form.
 
@@ -149,4 +149,4 @@ There is a full working demo project based on my django-skeleton here : [ExtJs d
   [6]: http://docs.djangoproject.com/en/dev/topics/forms/formsets/
   [7]: http://docs.djangoproject.com/en/dev/topics/forms/modelforms/
   [8]: http://github.com/revolunet/django-skeleton/tree/extjs
- 
+  [9]: http://www.sencha.com/products/extjs/license/
